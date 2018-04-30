@@ -4,19 +4,20 @@ title: About
 permalink: /about/
 ---
 
-**How do u do?**
+##How do u do?
 
-**Welcome to Ivan's blog.**
+##Welcome to Ivan's blog.
 
-*To follow the path:*
 
-*沿着这样一条道路：*
+>*To follow the path:*
 
-*look to the master,*
+>*沿着这样一条道路：*
 
-*关注大师，*
+>*look to the master,*
 
-*follow the master,*
+>*关注大师，*
+
+>*follow the master,*
 
 >*跟随大师*
 
