@@ -8,6 +8,7 @@ permalink: /about/
 
 ## Welcome to Ivan's blog.
 
+***
 
 >*To follow the path:*
 
