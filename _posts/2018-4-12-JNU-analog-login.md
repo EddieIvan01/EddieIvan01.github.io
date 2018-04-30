@@ -1,7 +1,7 @@
 ---
 layout: post
-title: 隔壁师大教务系统模拟登录
-summary: 爬完矿大爬师大
+title: "隔壁师大教务系统模拟登录"
+summary: "爬完矿大爬师大"
 featured-img: emile-perron-190221
 
 ---
