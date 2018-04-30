@@ -1,73 +1,156 @@
 ---
 layout: post
-title: Getting Started with Sleek
+title: Zip压缩文件暴力破解脚本
 featured-img: sleek
 ---
 
-## Getting started
+##zip密码暴力破解脚本
+昨天了解到python的zipfile库，想到可以写一个暴力破解压缩密码的脚本
 
-[GitHub Pages](https://pages.github.com) can automatically generate and serve the website for you.
-Let's say you have a username/organisation `my-org` and project `my-proj`; if you locate Jekyll source under `docs` folder of master branch in your repo `github.com/my-org/my-proj`, the website will be served on `my-org.github.io/my-proj`.
-The good thing about coupling your documentation with the source repo is, whenever you merge features with regarding content to master branch, it will also be published in the webpage instantly.
 
-1. Just download the source from [github.com/janczizikow/sleek](https://github.com/janczizikow/sleek/) into your repo under `docs` folder.
-2. Edit site settings in  `_config.yml` file according to your project.
-3. Replace `favicon.ico` and `img/logonav.png` with your own logo.
+##主要使用zipfile库，实现多线程的暴力破解
+**首先是usage提示**
+```swift
+def usage():
+     print('***************************************************************')
+     print('Crack the zip file, use args: -f :zip file name, -d dic name')
+     print('e.g.  zip_crack.exe -f 1.zip -d dic.txt')
+     print('***************************************************************')
+ ```
+-f 指定破解的zip文件
+-d 指定使用的字典文件
 
-## Writing content
+**获取参数并解析**
+```swift
+    file_name = ''
+    dic_name = ''    
+    try:
+        opts,args = getopt.getopt(sys.argv[1:],'f:d:')
+        for a,b in opts:
+            if a == '-f':
+                file_name = b
+            if a == '-d':
+                dic_name = b
+        crack_dic = open(dic_name,'r')   
+    except:
+        usage()
+        sys.exit()   
+```
+**使用字典进行破解**
+```swift
+try:         
+      file_gue.extractall(pwd = i.strip('\n').encode('utf-8'))
+      print('[*]Successfully crack, passwd is '+i)
+      break
+except:
+      pass
+```
 
-### Docs
+***
+##完整版代码
+```swift
+import zipfile
+import getopt
+import sys
+import threading
+def usage():
+    print('***************************************************************')
+    print('Crack the zip file, use args: -f :zip file name, -d dic name')
+    print('e.g.  zip_crack.exe -f 1.zip -d dic.txt')
+    print('***************************************************************')
+def crack(file_name,crack_dic,file_gue):
+    kv = crack_dic.readlines()
+    end_num = kv[-1]
+    for i in kv:          
+        print('[+]try passwd:'+i)                                  
+        if i.strip('\n') == end_num.strip('\n'):                    
+            try:
+                file_gue.extractall(pwd = i.strip('\n').encode('utf-8'))
+                print('[*]Successfully crack, passwd is '+i) 
+                break
+            except:
+                print('[*]Crack fail, please change your dic')  
+                sys.exit()
+        try:         
+            file_gue.extractall(pwd = i.strip('\n').encode('utf-8'))
+            print('[*]Successfully crack, passwd is '+i)
+            break
+        except:
+            pass
+    crack_dic.close()
+def main():
+    file_name = ''
+    dic_name = ''    
+    try:
+        opts,args = getopt.getopt(sys.argv[1:],'f:d:')
+        for a,b in opts:
+            if a == '-f':
+                file_name = b
+            if a == '-d':
+                dic_name = b
+        crack_dic = open(dic_name,'r')   
+    except:
+        usage()
+        sys.exit()   
+    file_gue = zipfile.ZipFile(file_name)
+    t = threading.Thread(target = crack(file_name,crack_dic,file_gue))
+    t.start()
+main()
+```
+![](https://upload-images.jianshu.io/upload_images/11356161-9fb00f8343993a6e.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240)
 
-Docs are [collections](https://jekyllrb.com/docs/collections/) of pages stored under `_docs` folder. To create a new page:
+**代码的github地址：**
+[github](https://github.com/EddieIvan01/zip_crack)
 
-**1.** Create a new Markdown as `_docs/my-page.md` and write [front matter](https://jekyllrb.com/docs/frontmatter/) & content such as:
+
+***
+**P.s**
+此处有个文件操作的坑，此处代码
+``` swift
+kv = crack_dic.readlines()
+end_num = kv[-1]
+for i in kv:
+```
+如果替换成两次对crack_dic进行readlines()操作，则第二次读取的将会是0字节文件，且解释器不会报错。
+```swift
+end_num =crack_dic.readlines()[-1]
+for i in crack_dic.readlines():
+```
+
+***
+**考虑到压缩密码大多是四位以下，就顺手写了个密码生成脚本，包含1-4位的英文数字字符密码**
+```swift
+import string
+num = []
+for i in string.uppercase+string.lowercase:
+    num.append(i)
+for i in range(0,10):
+    num.append(str(i))
+print(num)
+fh = open('dic_weak.txt','w')
+for i in num:
+    fh.write(i+'\n')
+for i in num:
+    for j in num:
+        fh.write(i+j+'\n')
+for i in num:
+    for j in num:
+        for k in num:
+            fh.write(i+j+k+'\n')
+for i in num:
+    for j in num:
+        for k in num:
+            for l in num:
+                fh.write(i+j+k+l+'\n')
+fh.close()
 
 ```
----
-title: My Page
-permalink: /docs/my-page/
----
 
-Hello World!
-```
+生成的密码字典有80M左右，共1500万行
+***
+#end
 
-**2.** Add the pagename to `_pages/docs.yml` file in order to list in docs navigation panel:
-
-```
-- title: My Group Title
-  docs:
-  - my-page
-```
-
-### Blog posts
-
-Add a new Markdown file such as `2017-05-09-my-post.md` and write the content similar to other post examples.
-
-### Pages
-
-The home page is located under `index.md` file. You can change the content or design completely different welcome page for your taste.
-
-In order to add a new page, create a new html or markdown file under root directory and link it in `_includes/header.html`.
-
-### Images TODO
-
-Introduce gulp optimization
-
-Breakpoint | Image Type | Width | Retina
------------- | ------------ | ------------- | -------------
-xs |Post Thumb | 535px | 1070px
-sm |Post Thumb | 500px| 1000px
-md |Post Thumb | 329.375px | 658.75px
-lg |Post Thumb | 445.625px | 891.25px
-xl |Post Thumb | 353.125px | 706.25px
+![](https://upload-images.jianshu.io/upload_images/11356161-43c97cf99391edcd.jpg?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240)
 
 
-Breakpoint | Image Type | Width | Retina
------------- | ------------ | ------------- | -------------
-xs |Post Hero | 535px | 1070px
-sm |Post Hero | 500px| 1000px
-md |Post Hero | 329.375px | 658.75px
-lg |Post Hero | 445.625px | 891.25px
-xl |Post Hero | 353.125px | 706.25px
-
-Happy hacking!
+#2018.3.31
