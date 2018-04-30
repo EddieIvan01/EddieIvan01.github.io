@@ -3,15 +3,6 @@ layout: page
 title: Contact
 permalink: /contact/
 ---
-
-### U can contact me with the following way
-
-Fill in the form or [email me](mailto:{{site.email}}) .
-
-{% include form.html %}
-
-{% include modal.html %}
-
                                                           i7Cr                    
                          ;2YC;                         ;2X2jlXF.                  
                          EYjCXEL.                   .7EVlrrL7rXY                  
@@ -48,6 +39,12 @@ Fill in the form or [email me](mailto:{{site.email}}) .
                    ZErriirrZG2L77777LLjFOOHNGXFFFFVYr::::;lVrrrrrrrrjN.           
                    .FX22VXE2ri::::::;;;iiii;;::::::;72l::iX1rrrrrrrrj8.           
                      .N71rriri:::::::::::::::::::::::;L2CVlrriiiiiiij8.           
-                     :7::::::........................:::::::::::::::;7            
-                                                                                  
+                     :7::::::........................:::::::::::::::;7       
+                     
+### U can contact me with the following way
 
+Fill in the form or [email me](mailto:{{site.email}}) .
+
+{% include form.html %}
+
+{% include modal.html %}
