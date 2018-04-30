@@ -4,30 +4,30 @@ title: About
 permalink: /about/
 ---
 
-**How do u do?
+**How do u do?**
 
-**Welcome to Ivan's blog.
+**Welcome to Ivan's blog.**
 
 >To follow the path:
 
-沿着这样一条道路：
+>沿着这样一条道路：
 
-look to the master,
+>look to the master,
 
-关注大师，
+>关注大师，
 
-follow the master,
+>follow the master,
 
-跟随大师，
+>跟随大师，
 
-walk with the master,
+>walk with the master,
 
-与大师同行，
+>与大师同行，
 
-see through the master,
+>see through the master,
 
-洞察大师，
+>洞察大师，
 
-become the master.
+>become the master.
 
-成为大师。
+>成为大师。
