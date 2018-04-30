@@ -4,12 +4,14 @@ title: Zip压缩文件暴力破解脚本
 featured-img: sleek
 ---
 
-##zip密码暴力破解脚本
+## zip密码暴力破解脚本
 昨天了解到python的zipfile库，想到可以写一个暴力破解压缩密码的脚本
 
 
-##主要使用zipfile库，实现多线程的暴力破解
+## 主要使用zipfile库，实现多线程的暴力破解
+
 **首先是usage提示**
+
 ```swift
 def usage():
      print('***************************************************************')
@@ -47,7 +49,9 @@ except:
 ```
 
 ***
-##完整版代码
+
+## 完整版代码
+
 ```swift
 import zipfile
 import getopt
@@ -104,7 +108,9 @@ main()
 
 
 ***
+
 **P.s**
+
 此处有个文件操作的坑，此处代码
 ``` swift
 kv = crack_dic.readlines()
@@ -118,6 +124,7 @@ for i in crack_dic.readlines():
 ```
 
 ***
+
 **考虑到压缩密码大多是四位以下，就顺手写了个密码生成脚本，包含1-4位的英文数字字符密码**
 ```swift
 import string
@@ -148,9 +155,9 @@ fh.close()
 
 生成的密码字典有80M左右，共1500万行
 ***
-#end
+# end
 
 ![](https://upload-images.jianshu.io/upload_images/11356161-43c97cf99391edcd.jpg?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240)
 
 
-#2018.3.31
+# 2018.3.31
