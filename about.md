@@ -30,6 +30,6 @@ permalink: /about/
 
 >*洞察大师，*
 
->become the master.
+>*become the master.*
 
->成为大师。
+>*成为大师。*
