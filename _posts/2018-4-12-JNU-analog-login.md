@@ -8,23 +8,32 @@ featured-img: emile-perron-190221
 
 ***
 # 前言
+
 **最后一篇爬虫技术文**
+
 **师大的教务网对登录加密不是很复杂（准确的说是并没有加密....），但还是走了些坑，不过总体应该只用了一个小时左右，这里记录一种登录验证的新方式**
+
 **以师大教务网的验证方式，盗cookie的杀伤力应该是很大的( :**
+
 ***
+
 # 正文
+
 这几天的电工材力机原计算方法简直令人窒息，闲暇之余，问一个好朋友借了师大的账号密码尝试爬教务网站
 首先还是看看页面源代码
+
 ![教务系统登录界面](https://upload-images.jianshu.io/upload_images/11356161-8f7c658c6f999cf0.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240)
+
 源代码翻到最下看到登录加密的js
+
 ![页面源代码](https://upload-images.jianshu.io/upload_images/11356161-36d94c147e53fbf6.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240)
-```
+```swift
 <script type="text/javascript">var Login = {forwardUrl:'http://myu.jsnu.edu.cn/index.portal',loginURL:'userPasswordValidate.portal',nameField:'Login.Token1',pwdField:'Login.Token2',isVPN:'isVPN',gotoUrl:'http://myu.jsnu.edu.cn/loginSuccess.portal',gotoFailUrl:'http://myu.jsnu.edu.cn/loginFailure.portal',hideCaptcha:true};</script>
 
 ```
 点击script/portal-login.js查看
 主要登录函数为以下两个
-```
+```swift
 function doLogin($) {
     Event.stop($);
     hideMsg();
@@ -48,7 +57,7 @@ function doLogin($) {
 }
 
 ```
-```
+```swift
 function handleLoginSuccessed() {
     location.href = Login["forwardUrl"] ? Login["forwardUrl"] : "index.portal"
 }
@@ -70,22 +79,36 @@ function handleLoginFailure(_, $) {
 
 ```
 之后F12查看了一下请求
+
 惯性思维先查看了post请求
+
 ![post请求参数](https://upload-images.jianshu.io/upload_images/11356161-16338bfe0b994760.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240)
+
 发现是以url的params形式提交的参数，而且好像不是登录凭证
 
 ![所有请求](https://upload-images.jianshu.io/upload_images/11356161-37e767d37d67a049.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240)
+
 之后查看了所有http请求，无一例外没有提交的参数，当时懵逼了一下，想到查看最初js代码里的`loginURL:'userPasswordValidate.portal'`，然而浏览器并没有捕捉到这个请求
+
 ***
 ## burp抓包
+
 接着选择使用burp监听所有http请求
+
 在这里找到了请求loginURL的请求
+
 ![](https://upload-images.jianshu.io/upload_images/11356161-ebeb36931dafd86e.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240)
+
 **不出意外提交的登录凭证在这里：login.token**
+
 接着它参数里的goto和gotoonfail又误导了我，此处不多说.....
+
 之后查看了请求页面发现提交了两个cookie
+
 ![](https://upload-images.jianshu.io/upload_images/11356161-edec8bfe3a855bef.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240)
+
 **再回到先前对loginurl的请求初，查看响应头的set-cookie字段，即登录凭证cookie**
+
 ![](https://upload-images.jianshu.io/upload_images/11356161-ae7f9896e96c9614.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240)
 
 ![](https://upload-images.jianshu.io/upload_images/11356161-41ea71d89aca76c1.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240)
@@ -96,11 +119,14 @@ function handleLoginFailure(_, $) {
 接着用浏览器查看请求的cookie，发现确实如此
 
 **师大的教务网用了ajax，两次请求index.portal页面，第二次通过登录凭证cookie验证**
+
 然后就顺理成章的登录成功
 ![](https://upload-images.jianshu.io/upload_images/11356161-ebcf5ed134136077.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240)
 
 ![](https://upload-images.jianshu.io/upload_images/11356161-2ed7cd115549e081.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240)
+
 整个页面分为四到五个部分由ajax异步加载，这里只获取了主页面的html，其余几部分的原理是相同的
+
 ***
 **最后贴上代码，随手写的，仅供参考**
 ```swift
@@ -154,9 +180,13 @@ req2 = r.get(url1,headers =cv1)
 print(req2.text)
 ```
 这里的cookies我是将其转为字符串然后进行切片拼接处理
+
 登录成功的后续爬虫操作就不写了，常规操作，简单的bs4库和RegExp处理一下就好
+
 ***
+
 **好了这是最后一篇爬虫文了，毕竟只是把爬虫当成一种娱乐工具，以后就主要更网安学习文**
+
 ![](https://upload-images.jianshu.io/upload_images/11356161-92029a510e662f89.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240)
 
 **P.S写点心情：今天真的很开心，下午打球后做实验，完了晚上回来吹了半小时笛子后写了这篇文，待会健身完洗个澡有一晚上自由支配时间，如果没有专业课压力，能以兴趣为导向，在无负面影响的前提下最大限度的获得对时间支配的自由，应该是最令人向往的事情。**
@@ -168,6 +198,7 @@ print(req2.text)
 **P.p.p.s当然心情好还有一个原因！明天上午上完课就是清明四天假了!!!**
 
 # end
+
 # 2018.4.3
 ***
 >《任我行》
