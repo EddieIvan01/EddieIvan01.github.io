@@ -65,7 +65,7 @@ post的数据包括csrf令牌以及明文的yhm（即学号，我随便敲的）
 
 **代码**
 
-```swift
+```python
 class httpmthd():
     sessions = requests.session()
     time = int(time.time())
