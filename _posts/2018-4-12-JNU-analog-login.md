@@ -27,13 +27,13 @@ featured-img: emile-perron-190221
 源代码翻到最下看到登录加密的js
 
 ![页面源代码](https://upload-images.jianshu.io/upload_images/11356161-36d94c147e53fbf6.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240)
-```swift
+```html
 <script type="text/javascript">var Login = {forwardUrl:'http://myu.jsnu.edu.cn/index.portal',loginURL:'userPasswordValidate.portal',nameField:'Login.Token1',pwdField:'Login.Token2',isVPN:'isVPN',gotoUrl:'http://myu.jsnu.edu.cn/loginSuccess.portal',gotoFailUrl:'http://myu.jsnu.edu.cn/loginFailure.portal',hideCaptcha:true};</script>
 
 ```
 点击script/portal-login.js查看
 主要登录函数为以下两个
-```swift
+```javascript
 function doLogin($) {
     Event.stop($);
     hideMsg();
@@ -57,7 +57,7 @@ function doLogin($) {
 }
 
 ```
-```swift
+```javascript
 function handleLoginSuccessed() {
     location.href = Login["forwardUrl"] ? Login["forwardUrl"] : "index.portal"
 }
@@ -129,7 +129,7 @@ function handleLoginFailure(_, $) {
 
 ***
 **最后贴上代码，随手写的，仅供参考**
-```swift
+```python
 import requests
 url1 = 'http://myu.jsnu.edu.cn/index.portal'
 url2 = 'http://myu.jsnu.edu.cn/userPasswordValidate.portal'
