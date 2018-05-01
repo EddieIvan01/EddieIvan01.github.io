@@ -12,9 +12,9 @@ summary: 一款为皮卡丘设计的编程语言...
  **转载自[trove42](http://trove42.com/introducing-pikachu-programming-language/)**
  
  
- ## Design Principles
+ # Design Principles
  
- ## 设计原则
+ # 设计原则
 
  1. *The language should be easily usable by Pikachus. Programs should be readable and writable by any Pikachu.*
  
@@ -28,9 +28,9 @@ summary: 一款为皮卡丘设计的编程语言...
 
  >3. *如果你是皮卡丘，皮卡丘编码应该很容易。 但是，如果你是一个人，并且在皮卡丘编写一系列程序，那么你用Pikachus的语言说/读/写的能力应该会显着提高。*
  
- ## U Can Find All Syntax Rules for Pikachu [Here](http://trove42.com/pikachu-syntax-rules/)
+ # U Can Find All Syntax Rules for Pikachu [Here](http://trove42.com/pikachu-syntax-rules/)
  
- ## 你可以[在这里](http://trove42.com/pikachu-syntax-rules/)查看所有皮卡丘语言语法规则
+ # 你可以[在这里](http://trove42.com/pikachu-syntax-rules/)查看所有皮卡丘语言语法规则
  
  **以下是用英语的人类语言解释的皮卡丘编程语言的语法和语言规则：**
 
@@ -69,9 +69,9 @@ summary: 一款为皮卡丘设计的编程语言...
 
 **注意：输入最初被添加到pi pikachu 。 要指定多个输入，请用空格分隔它们。 第一笔投入将首先推到pi pikachu ，然后是第二笔，依此类推.**
  
- ## Sample Programs:
+ # Sample Programs:
  
- ## 示例程序：
+ # 示例程序：
  
  **打印"hello world"的程序**
  ```swift
