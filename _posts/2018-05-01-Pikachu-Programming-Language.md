@@ -16,17 +16,17 @@ summary: 一款为皮卡丘设计的编程语言...
  
 ## 设计原则
 
- 1. *The language should be easily usable by Pikachus. Programs should be readable and writable by any Pikachu.*
+ * *The language should be easily usable by Pikachus. Programs should be readable and writable by any Pikachu.*
  
- >1. *这种语言应该很容易被Pikachus使用。 程序应该可以被任何皮卡丘读写。*
+ > *这种语言应该很容易被Pikachus使用。 程序应该可以被任何皮卡丘读写。*
  
- 2. *The language should utilise only elements of Pikachu language. This is actually a very good thing since human language is often messy and complicated. But since Pikachu is based on the language of the Pikachus, it can make do with only the following three syntax elements : pi, pika, pikachu*
+ * *The language should utilise only elements of Pikachu language. This is actually a very good thing since human language is often messy and complicated. But since Pikachu is based on the language of the Pikachus, it can make do with only the following three syntax elements : pi, pika, pikachu*
  
- >2. *该语言应该只使用皮卡丘语言的元素。 这实际上是一件非常好的事情，因为人类的语言经常是混乱和复杂的。 但是因为皮卡丘是基于派卡舒语言的，所以只能使用以下三种语法元素：pi，pika，pikachu*
+ > *该语言应该只使用皮卡丘语言的元素。 这实际上是一件非常好的事情，因为人类的语言经常是混乱和复杂的。 但是因为皮卡丘是基于派卡舒语言的，所以只能使用以下三种语法元素：pi，pika，pikachu*
  
- 3. *Coding in Pikachu should be easy if you’re a Pikachu. However, if you’re a human being and write a bunch of programs in Pikachu, you’re ability to speak/read/write in the language of Pikachus should improve significantly.*
+ * *Coding in Pikachu should be easy if you’re a Pikachu. However, if you’re a human being and write a bunch of programs in Pikachu, you’re ability to speak/read/write in the language of Pikachus should improve significantly.*
 
- >3. *如果你是皮卡丘，皮卡丘编码应该很容易。 但是，如果你是一个人，并且在皮卡丘编写一系列程序，那么你用Pikachus的语言说/读/写的能力应该会显着提高。*
+ > *如果你是皮卡丘，皮卡丘编码应该很容易。 但是，如果你是一个人，并且在皮卡丘编写一系列程序，那么你用Pikachus的语言说/读/写的能力应该会显着提高。*
  
 ## U Can Find All Syntax Rules for Pikachu [Here](http://trove42.com/pikachu-syntax-rules/)
  
