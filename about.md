@@ -4,8 +4,6 @@ title: About
 permalink: /about/
 ---
 
-## How do u do?
-
 ## Welcome to Ivan's blog.
 
 ***
