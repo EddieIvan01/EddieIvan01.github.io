@@ -1,11 +1,11 @@
 ---
 layout: post
-title: 记今晚群内机器人被玩崩的过程
-summary: 吸取教训：权限配置是多么的重要 [:doge]
+title: 记群内代码指令机器人被玩崩的过程
+summary: 吸取教训：权限配置是多么的重要
 featured-img: th
 ---
 # 前言：
-### 前几天技术群里一个大兄弟弄了一个机器人，super指令可以调用机器人执行代码。如`super shell echo 1`，`super c++ #include ........`，`super eval (1+1)*2`，`super python print "hello world"`等等等等，详细技术文档见下图
+### 前几天群里一个大兄弟弄了个机器人，super指令可以调用机器人执行代码。如`super shell echo 1`，`super c++ #include ........`，`super eval (1+1)*2`，`super python print "hello world"`等等等等，详细技术文档见下图
 
 ![](https://upload-images.jianshu.io/upload_images/11356161-8f8993046f07567b.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240)
 
@@ -16,7 +16,7 @@ featured-img: th
 ***
 # 正文
 
-**既然能执行代码那就等于拿到shell了啊，然后那位大兄弟说php是用了他朋友的服务器，shell是调用web api。既然这样，群友们当然要帮他完善啊！[:doge]**
+**既然能执行代码那就等于拿到shell了啊，然后那位大兄弟说php是用了他朋友的服务器，shell是调用web api。既然这样，群友们当然要帮他完善！[:doge]**
 
 **首先试了`super php echo $GLOBALS`，`super php strcmp()`这些，之后在调用`super php --help`时居然爆出了路径，那好了，unlink函数可以试试了（unlink是php的删除本地文件函数，linux下也有unlink，在删除文件时的效果等同与rm指令，区别是不能删除文件夹)**
 
