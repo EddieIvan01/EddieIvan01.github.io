@@ -1,6 +1,6 @@
 ---
 layout: post
-title: 计算机等级考试成绩查询破解
+title: NCRE成绩查询破解
 summary: 半自动化的暴力破解身份证号查询
 featured-img: cat
 ---
