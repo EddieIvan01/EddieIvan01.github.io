@@ -2,7 +2,7 @@
 layout: post
 title: 记群内代码指令机器人被玩崩的过程
 summary: 吸取教训：权限配置是多么的重要
-featured-img: th
+featured-img: beta
 ---
 # 前言：
 ### 前几天群里一个大兄弟弄了个机器人，super指令可以调用机器人执行代码。如`super shell echo 1`，`super c++ #include ........`，`super eval (1+1)*2`，`super python print "hello world"`等等等等，详细技术文档见下图
