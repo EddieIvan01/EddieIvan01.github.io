@@ -438,3 +438,9 @@ function goon(){
 **程序源码已上传github：**
 **[NCRE_Crack](https://github.com/EddieIvan01/NCRE_Crack)**
 
+***
+
+# 2018.5.14
+# 经论坛多人提醒，为避免不必要的法律责任，现已将git仓库源码删除
+
+![](https://upload-images.jianshu.io/upload_images/11356161-0fd0fc2b07a098f7.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240)
