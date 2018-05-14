@@ -1,7 +1,7 @@
 ---
 layout: post
 title: NCRE成绩查询破解
-summary: 半自动化的暴力破解身份证号查询
+summary: 半自动化的暴力破解身份证号查询                 为避免不必要的法律责任，git仓库中的源代码已删除
 featured-img: cat
 ---
 # NCRE成绩查询系统的半自动破解
