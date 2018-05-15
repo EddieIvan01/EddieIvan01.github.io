@@ -2,7 +2,7 @@
 layout: post
 title: The Pikachu Programming Language
 featured-img: pika
-summary: 一款为皮卡丘设计的编程语言...
+summary: 一款为皮卡丘设计的编程语言(转载)
 ---
 
 # Introducing The Pikachu Programming Language – A Programming Language Made For Pikachus
