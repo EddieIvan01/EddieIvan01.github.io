@@ -89,8 +89,8 @@ printf("%p",pit[0]);    //以%p格式打印时，会打印出'H'的地址，因�
 + void指针和别的指针永远不会相等
 + void指针只用于作数据指针，而不能用于函数指针
 + 可以用`sizeof`操作符返回void指针长度，但不能返回void类型长度
- + `size_t n = sizeof(void*);`  //正确
- + `size_t n = sizeof(void);`   //错误
+  + `size_t n = sizeof(void*);`  //正确
+  + `size_t n = sizeof(void);`   //错误
 
 ***
 
@@ -147,10 +147,13 @@ const int* pit = &n;    //const修饰*pit，即指向常量的指针
 int *pit = (int*) malloc(sizeof(int));  //malloc()执行成功返回地址；失败返回NULL
 *pit = 1;
 ```
-注意：malloc函数返回的指针是没有清空的，里面可能包含垃圾数据。与calloc函数的区别在此。
+**注意：**
+
+malloc函数返回的指针是没有清空的，里面可能包含垃圾数据。与calloc函数的区别在此。
 
 **realloc函数**
-**在之前分配的内存块的基础上，将内存重新分配为更大或更小的部分**
+
+在之前分配的内存块的基础上，将内存重新分配为更大或更小的部分
 ```c
 int n = 1;
 int *pit = (int*) malloc(2);
@@ -159,9 +162,11 @@ pit = &n;
 ```
 
 **calloc函数**
+
 返回清空过的指针，不包含垃圾数据。但执行效率低于malloc函数
 
 **free函数**
+
 用于释放内存
 ```c
 int *pit = (int*) malloc(4);
