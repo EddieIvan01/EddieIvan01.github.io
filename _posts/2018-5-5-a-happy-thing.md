@@ -1,6 +1,6 @@
 ---
 layout: post
-title: 记群内代码指令机器人被玩崩的过程
+title: 记玩崩代码指令机器人的过程
 summary: 吸取教训：权限配置是多么的重要
 featured-img: beta
 ---
