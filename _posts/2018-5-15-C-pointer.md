@@ -457,4 +457,50 @@ int* restrict pit = &num;
 
 ***
 
+## 字符串指针操作的坑
+
+**一下两种错误编译器不会报错，程序会因为堆栈溢出而崩溃**
+
+在定义一个字符串的时候，以下是合法的：
+```c
+char* str[] = "ivan";
+```
+
+以下是非法的：
+```c
+char* str[];
+str = "ivan";
+*str = "ivan";
+```
+
+相较与指针声明字符串也是一样：
+```c
+char* str = (char*) malloc(20);
+str = "ivan";         //非法
+```
+
+使用strcpy函数才是正确的方式
+```c
+char* str = (char*) malloc(20);
+strcpy(str,"ivan");
+```
+
+操作字符串时，strcat函数需要动态分配内存：
+```c
+char* str1 = "hello";
+char* str2 = " ivan";
+strcat(str1,str2);          //堆栈溢出 
+```
+
+正确的做法：
+```c
+char* str1 = (char*) malloc(40);
+memset(str1,0,40);
+strcpy(str1,"hello");
+strcat(str1," ivan");
+```
+或者在拼接的时候调用remalloc函数重新分配内存
+
+***
+
 # 大概总结的就这么多了，滚去复习电工和计算方法了-->_-->
