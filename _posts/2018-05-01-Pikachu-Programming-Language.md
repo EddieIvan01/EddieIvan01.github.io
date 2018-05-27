@@ -1,6 +1,6 @@
 ---
 layout: post
-title: The Pikachu Programming Language
+title: 【转】The Pikachu Programming Language
 featured-img: pika
 summary: 一款为皮卡丘设计的编程语言(转载)
 ---
