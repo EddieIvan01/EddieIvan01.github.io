@@ -5,7 +5,7 @@ summary: 吸取教训：权限配置是多么的重要
 featured-img: beta
 ---
 # 前言：
-### 前几天群里一个大兄弟弄了个机器人，super指令可以调用机器人执行代码。如`super shell echo 1`，`super c++ #include ........`，`super eval (1+1)*2`，`super python print "hello world"`等等等等，详细技术文档见下图
+### 前几天群里一个同学弄了个机器人，super指令可以调用机器人执行代码。如`super shell echo 1`，`super c++ #include ........`，`super eval (1+1)*2`，`super python print "hello world"`等等等等，详细技术文档见下图
 
 ![](https://upload-images.jianshu.io/upload_images/11356161-8f8993046f07567b.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240)
 
