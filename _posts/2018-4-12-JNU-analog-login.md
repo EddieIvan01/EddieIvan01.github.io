@@ -1,6 +1,6 @@
 ---
 layout: post
-title: 隔壁师大教务系统模拟登录
+title: 隔壁师大教务系统模拟登录爬虫
 summary: 针对江苏师大教务系统的模拟登录爬虫
 featured-img: emile-perron-190221
 
