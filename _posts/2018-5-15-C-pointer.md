@@ -206,15 +206,27 @@ void main(){
 **在VB以及Python中：**
 
 + VB中函数传参会有显式声明by val或by ref，即传值或传参；如没有显示声明则程序默认传值
-+ Python中默认字符串，整数等类型传值，即创建副本；list，dict等类型传地址，即可在函数中修改
++ Python中默认字符串，整数等类型传值，即创建副本；list，dict等类型传地址，即可在函数中修改。**实践中发现：函数中对列表操作，"+"操作符默认以函数局部变量操作，如需操作列表，需调用list对象的成员函数**，另：**Python中对象赋值为传递指针，如`a = 1;b = 1`**
 
-写一个简单的程序来直观展示Python的逻辑：
+在函数传参外的对象机制，写一个简单的程序来直观展示Python的逻辑：
 ```python
 print("Ivan" == "Ivan")   #True
-print("Ivan" is "Ivan")   #False
+print("Ivan" is "Ivan")   #True
+
+a = "1 1"
+b = "1 1"
+print(a is b)   #False
+
+print(1 == 1)   #True
+print(1 is 1)   #True
+
+print(257 ==257)    #True
+print(257 is 257)   #False
+
 print([1,2] == [1,2])   #True
-print([1,2] is [1,2])   #True
+print([1,2] is [1,2])   #False
 ```
+**上面例子中，由于字符串驻留机制，"Ivan"字符串被重复使用；字符串驻留机制仅限于/[a-zA-Z0-9_]/字符，不限长度；整数驻留，仅限于-5~256的小整数；列表对象每一次创建都会新建对象，id值不同；**
 
 **函数指针**
 
