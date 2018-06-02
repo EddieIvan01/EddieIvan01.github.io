@@ -276,7 +276,7 @@ void main(){
     printf("%d",process(&add,1,2));
 }
 ```
-如此利用函数指针降低了代码的维护难度
+函数指针用来实现callback fuction以及OOP中的多态
 
 ***
 
