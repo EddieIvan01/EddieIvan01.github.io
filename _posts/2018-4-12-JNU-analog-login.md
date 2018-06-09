@@ -1,7 +1,7 @@
 ---
 layout: post
-title: Python隔壁师大教务系统模拟登录
-summary: 针对江苏师大教务系统的模拟登录爬虫
+title: 师大教务系统模拟登录
+summary: 针对隔壁江苏师大教务系统的模拟登录爬虫
 featured-img: emile-perron-190221
 
 ---
