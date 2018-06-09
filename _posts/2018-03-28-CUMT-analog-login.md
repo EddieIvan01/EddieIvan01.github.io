@@ -11,6 +11,9 @@ featured-img: shane-rounce-205187
 
 在此记录模拟登录cumt教务系统
 
+Demo
+
+![](https://upload-images.jianshu.io/upload_images/11356161-905be1d471c051ea.gif?imageMogr2/auto-orient/strip)
 
 ## 正文开始
 
@@ -138,7 +141,6 @@ class httpmthd():
 
 模拟登录后顺便做了成绩获取
 
-![](https://upload-images.jianshu.io/upload_images/11356161-e6c1f2275d95ee44.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/700)
 
 打算有时间了敲一个多线程暴力抢课脚本，但是很狗的是，敲完程序测试的机会就只有学期末抢课那几天，这学期敲好调试好要等到过一学期才能拿来用 ( :
 
