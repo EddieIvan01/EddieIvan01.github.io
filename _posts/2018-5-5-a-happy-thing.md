@@ -4,32 +4,33 @@ title: 记玩崩代码指令机器人的过程
 summary: 吸取教训：权限配置是多么的重要
 featured-img: beta
 ---
-# 前言：
-### 前几天群里一个同学弄了个机器人，super指令可以调用机器人执行代码。如`super shell echo 1`，`super c++ #include ........`，`super eval (1+1)*2`，`super python print "hello world"`等等等等，详细技术文档见下图
+## 前言：
+
+**前几天群里一个同学弄了个机器人，super指令可以调用机器人执行代码。如`super shell echo 1`，`super c++ #include ........`，`super eval (1+1)*2`，`super python print "hello world"`等等等等，详细技术文档见下图**
 
 ![](https://upload-images.jianshu.io/upload_images/11356161-8f8993046f07567b.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240)
 
 ![](https://upload-images.jianshu.io/upload_images/11356161-a298bfe3da67b4e3.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240)
 
-## 此处30号小可爱即为机器人
+*此处30号小可爱即为机器人*
 
 ***
-# 正文
+## 正文
 
-**既然能执行代码那就等于拿到shell了啊，然后那位大兄弟说php是用了他朋友的服务器，shell是调用web api。既然这样，群友们当然要帮他完善！[:doge]**
+既然能执行代码那就等于拿到shell了，然后那位大兄弟说php是用了他朋友的服务器，shell是调用web api。
 
-**首先试了`super php echo $GLOBALS`，`super php strcmp()`这些，之后在调用`super php --help`时居然爆出了路径，那好了，unlink函数可以试试了（unlink是php的删除本地文件函数，linux下也有unlink，在删除文件时的效果等同与rm指令，区别是不能删除文件夹)**
+首先试了`super php echo $GLOBALS`，`super php strcmp()`这些，之后在调用`super php --help`时居然爆出了路径，那好了，unlink函数可以试试了（unlink是php的删除本地文件函数，linux下也有unlink，在删除文件时的效果等同与rm指令，区别是不能删除文件夹)
 
 ![](https://upload-images.jianshu.io/upload_images/11356161-8b47afaba178d444.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240)
 
 
-**发现在输入绝对路径时没执行成功，于是决定从后往前试**
+发现在输入绝对路径时没执行成功，于是决定从后往前试
 
 
 ![](https://upload-images.jianshu.io/upload_images/11356161-793fa9bedb5968d1.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240)
 
 
-**然后就删除成功了，eval.php被删除，机器人php服务器成功挂掉，指令执行后全是报错信息**
+然后就删除成功了，eval.php被删除，机器人php服务器成功挂掉，指令执行后全是报错信息
 
 ```html
 @旧日昼 !DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"> 
@@ -138,15 +139,15 @@ table tr.alt td,table tr.alt th{background-color:#ebebeb;}
 </html> 
 ```
 
-### 然后，那个大兄弟就想着怎么跟他朋友负荆请罪去了[:doge]
+然后，那个大兄弟就想着怎么跟他朋友负荆请罪去了
 
 
 ***
 
 
-### 接着过了两个小时，机器人再次上线，这次加了python功能，也是调用web api，试了urllib2和socket库发现网都不能联，接着调用os.system发现/etc目录权限都没有，所以这个不会像php一样被玩坏了
+接着过了两个小时，机器人再次上线，这次加了python功能，也是调用web api，试了urllib2和socket库发现网都不能联，接着调用os.system发现/etc目录权限都没有，所以这个不会像php一样被玩坏了
 
-### p.s  php也上线了，不过也是调用web api
+p.s  php也上线了，不过也是调用web api
 
 ![](https://upload-images.jianshu.io/upload_images/11356161-0e3f5698210bc8c1.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240)
 
@@ -154,16 +155,16 @@ table tr.alt td,table tr.alt th{background-color:#ebebeb;}
 
 ***
 
-**在接下来又加入了linux shell功能，发现这次有权限进一些目录，但是没root权限还是干不了什么坏事，甚至连关机重启都得sudo才行**
+在接下来又加入了linux shell功能，发现这次有权限进一些目录，但是没root权限还是干不了什么坏事，甚至连关机重启都得sudo才行
 
 
-**之后那位大兄弟把python也迁移到了shell服务器上，就是他自己的那台服务器，在查看了半天/usr/bin之类的目录后，发现/etc/init.d的系统服务目录里有reboot**
+之后那位大兄弟把python也迁移到了shell服务器上，就是他自己的那台服务器，在查看了半天/usr/bin之类的目录后，发现/etc/init.d的系统服务目录里有reboot
 
 
 ![](https://upload-images.jianshu.io/upload_images/11356161-5c195f9415d2405c.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240)
 
 
-**然后就`super python import os;os.system("service reboot start/stop")`，发现居然执行了**
+然后就`super python import os;os.system("service reboot start/stop")`，发现居然执行了
 
 
 ![](https://upload-images.jianshu.io/upload_images/11356161-e63ec720e28bdf4e.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240)
@@ -173,14 +174,14 @@ table tr.alt td,table tr.alt th{background-color:#ebebeb;}
 ***
 
 
-**p.s 解释下我的群名片为什么叫旧日昼，因为群里一个叫新月夜的小新同学**
+p.s 解释下我的群名片为什么叫旧日昼，因为群里一个叫新月夜的小新同学
 
 
 ![](https://upload-images.jianshu.io/upload_images/11356161-fc7e36749f1e67a3.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240)
 ![](https://upload-images.jianshu.io/upload_images/11356161-a3422d4db18c585b.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240)
 
 
-**我一想到IT行业是多么辛苦，头发掉的是多么快啊！于是我毅然决然的和她一起每天发出善意的劝告**
+我一想到IT行业是多么辛苦，头发掉的是多么快啊！于是我毅然决然的和她一起每天发出善意的劝告
 
 
-# end
+## end
