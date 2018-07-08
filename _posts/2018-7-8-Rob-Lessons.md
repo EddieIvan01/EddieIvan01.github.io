@@ -67,3 +67,11 @@ def lessons(self,no):
 [CUMT公选课抢课脚本](https://github.com/EddieIvan01/Lessons_Robber)
 
 需要将模拟登录代码与抢课代码放于同一目录下，并修改config.json，具体使用说明见README
+
+***
+
+2018/7/8  23:45
+
+![](https://upload-images.jianshu.io/upload_images/11356161-f0b8307e59fd11e0.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240)
+
+洗个澡的功夫抢课成功了，终于修满公选课学分了
