@@ -22,7 +22,8 @@ featured-img: lesson
 + 为了用户自定义线程数量，我使用了一个列表容器存储线程实例化的对象，此处感叹Python语言的优雅，容器什么都能装，并遍历容器来调用Thread的Start函数
 + 再有就是一些玄学问题，两个headers，cookie，data都相同的post请求一个会返回400 Bad Request；当我用移动宽带或VPS访问的时候也会返回400。此处：400为请求参数错误。玄学问题困扰了我很久。而且在我调试的时候，打印响应的状态码，连着手机热点时请求正常返回200，换到宽带瞬间变成400，[CSDN上有人相同的情况](https://bbs.csdn.net/topics/390131855)，可能是ISP线路问题导致丢包，但浏览器请求完全正常。嗯这一定是玄学
 
-核心代码：
+核心请求函数：
+
 ```python
 def lessons(self,no):
         global THREAD_FLAG
