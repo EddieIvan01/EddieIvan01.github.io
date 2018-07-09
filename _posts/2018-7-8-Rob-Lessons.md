@@ -1,7 +1,7 @@
 ---
 layout: post
 title: CUMT公选课抢课脚本
-summary: 多线程暴力抢课脚本
+summary: Lessons Robber多线程暴力抢课脚本
 featured-img: lesson
 ---
 
