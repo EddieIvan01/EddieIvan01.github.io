@@ -1,16 +1,11 @@
 ---
 layout: post
-title: Intel x86汇编速查
+title: Intel x86汇编速查笔记
 summary: Assembly language makes me wanna sit in a corner and cry
 futured-img: assembly
 ---
 
-
-
-## Intel x86 汇编速查
-
 ***
-
 
 
 ![](https://upload-images.jianshu.io/upload_images/11356161-017bb5a04a71d1b7.jpg?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240)
