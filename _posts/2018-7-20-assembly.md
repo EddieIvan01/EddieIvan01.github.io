@@ -2,7 +2,7 @@
 layout: post
 title: Intel x86汇编速查笔记
 summary: Assembly language makes me wanna sit in a corner and cry
-futured-img: assembly
+featured-img: assembly
 ---
 
 ***
