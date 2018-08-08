@@ -1,8 +1,8 @@
 ---
 layout: post
 featured-img: pool
-title: 构建一个代理IP池
-summary: 用Go语言编写的代理池，采集免费代理存入数据库，并在本地2333端口提供json API
+title: Go语言代理IP池
+summary: 学习Golang后练手。项目采集免费代理验证可用性后存入数据库，并在本地2333端口提供json API
 ---
 
 **Demo:** 
