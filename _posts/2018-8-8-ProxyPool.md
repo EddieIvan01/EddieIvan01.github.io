@@ -2,7 +2,7 @@
 layout: post
 featured-img: pool
 title: Go语言代理IP池
-summary: 学习Golang后练手。项目采集免费代理验证可用性后存入数据库，并在本地2333端口提供json API
+summary: Golang练手。项目采集免费代理验证可用性后存入数据库，并在本地2333端口提供json API
 ---
 
 **Demo:** 
