@@ -2,7 +2,7 @@
 layout: post
 featured-img: pool
 title: Go语言代理IP池
-summary: Golang练手。项目采集免费代理验证可用性后存入数据库，并在本地2333端口提供json API
+summary: Golang练手。项目采集免费代理验证可用性后存入数据库，并在本地监听2333端口提供json API
 ---
 
 **Demo:** 
@@ -31,32 +31,32 @@ summary: Golang练手。项目采集免费代理验证可用性后存入数据�
   + 202：请求参数错误
 + 数据形式：
 
-anonymous: 是否高匿
+  `anonymous`: 是否高匿
 
-ssl：是否https
+  `ssl`：是否https
 
-```
-data{
-    "code" : 200,
-    "proxies" : [
-        {
-            "ip" : "118.190.95.43",
-            "port" : "9001",
-            "anonymous" : "1",
-            "ssl" : "0"
-        },
-        {
-            "ip" : "171.39.1.149",
-            "port" : "8123",
-            "anonymous" : "1",
-            "ssl" : "1"
-        }
-        .
-        .
-        .
-    ]
-}
-```
+  ```
+  data{
+      "code" : 200,
+      "proxies" : [
+          {
+              "ip" : "118.190.95.43",
+              "port" : "9001",
+              "anonymous" : "1",
+              "ssl" : "0"
+          },
+          {
+              "ip" : "171.39.1.149",
+              "port" : "8123",
+              "anonymous" : "1",
+              "ssl" : "1"
+          },
+          .
+          .
+          .
+      ]
+  }
+  ```
 
 **架构**：
 
@@ -67,8 +67,8 @@ data{
 
 开启监听，提供API:
 
-+ /proxy?get: 查询数据库，并返回数据库中全部代理
-+ /proxy?reflush: 检查数据库已存在代理的可用性；请求代理网站获取IP，将可用IP插入数据库
++ /proxy?act=get: 查询数据库，并返回数据库中全部代理
++ /proxy?act=reflush: 检查数据库已存在代理的可用性；请求代理网站获取IP，将可用IP插入数据库
 
 **验证策略**：
 
