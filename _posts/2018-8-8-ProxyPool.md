@@ -90,7 +90,7 @@ summary: Golang练手。项目采集免费代理验证可用性后存入数据�
 
 + `json.Marshal`只编码包级公有变量
 + `range`遍历channel时会阻塞直到channel被关闭，变量push完成后应`defer close(channel)`
-+ 缓冲channel当FIFO队列很好用
++ 缓冲`channel`当FIFO队列很好用，无缓冲`channel`作信号通信同步很好用
 + `http.Client`的很多属性是`Transport` 提供的
 + `[]byte`不能与`nil`外的类型进行`==`比较，`string`可以，所以可转换`string([]byte)`后比较
 + Http Server是由`http.NewServeMux`运作，如未显式声明（`http.ListenAndServe`函数传参`http.Handler`为`nil`）则是默认`DefaultMux`
