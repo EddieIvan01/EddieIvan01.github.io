@@ -212,12 +212,13 @@ class httpmthd():
         self.token = soup.find('input',attrs={'id':'csrftoken'}).attrs['value']
 
     def process_public(self,str):               #处理密码,rsa加密
-        self.exponent = Base64().b64_to_hex(self.pub['exponent'])           #将json中的base64加密公钥解密
-        self.modulus = Base64().b64_to_hex(self.pub['modulus'])
+        a = HB64()
+        self.exponent = a.b642hex(self.pub['exponent'])           #将json中的base64加密公钥解密
+        self.modulus = a.b642hex(self.pub['modulus'])
         rsa = RSAJS.RSAKey()
         rsa.setPublic(self.modulus, self.exponent)                          #rsa加密
         cry_data = rsa.encrypt(str)
-        return Base64().hex_to_b64(cry_data)                                #加密后的数据进行base64加密
+        return a.hex2b64(cry_data)                                #加密后的数据进行base64加密
 
     def post_data(self):                        #post数据
         try:
