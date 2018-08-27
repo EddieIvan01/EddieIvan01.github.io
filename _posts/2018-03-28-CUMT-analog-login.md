@@ -64,7 +64,12 @@ post的数据包括csrf令牌以及明文的yhm（即学号，我随便敲的）
 
 **rsa加密是最麻烦的地方**
 
-**此处参考stackoverflow文章[戳我](https://stackoverflow.com/questions/40094108/i-have-a-rsa-public-key-exponent-and-modulus-how-can-i-encrypt-a-string-using-p)**
+由于使用标准库中的`base64`会将hex串转为字节，而这里的`RSA`密钥则是需要完整的hex字符串，例如标准库中`a0 => YTA=`，而我需要`a0 => oA==
+`即将`a0`看作一个字节的hex值进行编码。
+
+故写了个`base64 => hex`的算法
+
+`RSA`加密参考stackoverflow文章[戳我](https://stackoverflow.com/questions/40094108/i-have-a-rsa-public-key-exponent-and-modulus-how-can-i-encrypt-a-string-using-p)
 
 **代码**
 
