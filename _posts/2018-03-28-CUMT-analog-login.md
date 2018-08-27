@@ -55,7 +55,7 @@ post的数据包括csrf令牌以及明文的yhm（即学号，我随便敲的）
 
 **cookies问题**
 
-使用requests库的requests.session()保持会话即可
+使用requests库的requests.session()保持会话
 
 
 ## 登录逻辑：从登录页面获取csrftoken，请求login_getpublickey.html提交时间参数获取rsa密钥，对获取到的密钥base64解密，用密钥对登录密码进行rsa加密，对密文再进行base64加密，最后post
@@ -185,7 +185,7 @@ class HB64(object):
         return result
 ```
 
-`RSA`加密是`JS`中的，有`setPublicKey`方法，一样不同于python标准库
+`RSA`加密是`JS`中的[jsbn](https://www.npmjs.com/package/jsbn)，有`setPublicKey`方法，一样不同于python标准库，[见此](http://www-cs-students.stanford.edu/%7Etjw/jsbn/)
 
 参考stackoverflow文章[戳我](https://stackoverflow.com/questions/40094108/i-have-a-rsa-public-key-exponent-and-modulus-how-can-i-encrypt-a-string-using-p)，用了github上别人写的`JS`原生`RSA`加密的python版程序
 
