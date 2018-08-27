@@ -186,7 +186,7 @@ class HB64(object):
         return result
 ```
 
-`RSA`加密参考stackoverflow文章[戳我](https://stackoverflow.com/questions/40094108/i-have-a-rsa-public-key-exponent-and-modulus-how-can-i-encrypt-a-string-using-p)，用了github上别人写的`JS`加密的python程序
+`RSA`加密参考stackoverflow文章[戳我](https://stackoverflow.com/questions/40094108/i-have-a-rsa-public-key-exponent-and-modulus-how-can-i-encrypt-a-string-using-p)，用了github上别人写的`JS`原生`RSA`加密的python版程序
 
 **代码**
 
