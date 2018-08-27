@@ -15,7 +15,7 @@ Demo
 
 ![](https://upload-images.jianshu.io/upload_images/11356161-905be1d471c051ea.gif?imageMogr2/auto-orient/strip)
 
-## 正文开始
+## 正文
 
 [教务系统网址](http://202.119.206.62/jwglxt/xtgl/login_slogin.html?language=zh_CN&_t=)
 
@@ -67,9 +67,126 @@ post的数据包括csrf令牌以及明文的yhm（即学号，我随便敲的）
 由于使用标准库中的`base64`会将hex串转为字节，而这里的`RSA`密钥则是需要完整的hex字符串，例如标准库中`a0 => YTA=`，而我需要`a0 => oA==
 `即将`a0`看作一个字节的hex值进行编码。
 
-故写了个`base64 => hex`的算法
+故写了个`base64 => hex`的算法: 
 
-`RSA`加密参考stackoverflow文章[戳我](https://stackoverflow.com/questions/40094108/i-have-a-rsa-public-key-exponent-and-modulus-how-can-i-encrypt-a-string-using-p)
+```python
+class HB64(object):
+
+    b64byte = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/"
+    b64cpt = "="
+
+    def hex2b64(self, string):
+        result = ""
+        ptr = 0
+        b1 = int("111111000000000000000000", 2)
+        b2 = int("000000111111000000000000", 2)
+        b3 = int("000000000000111111000000", 2)
+        b4 = int("000000000000000000111111", 2)
+        lenth = len(string)
+        while ptr+6 <= lenth:
+            temp = int(string[ptr:ptr+6], 16)
+            result += self.b64byte[(temp & b1) >> 18] 
+            result += self.b64byte[(temp & b2) >> 12]
+            result += self.b64byte[(temp & b3) >> 6]
+            result += self.b64byte[temp & b4]
+            ptr += 6
+        if lenth-ptr == 4:
+            temp = int(string[ptr:ptr+4], 16) << 2
+            result += self.b64byte[(temp & b2) >> 12]
+            result += self.b64byte[(temp & b3) >> 6]
+            result += self.b64byte[temp & b4]
+            result += self.b64cpt
+        elif lenth-ptr == 2:
+            temp = int(string[ptr:ptr+2], 16) << 4
+            result += self.b64byte[(temp & b3) >> 6]
+            result += self.b64byte[temp & b4]
+            result += self.b64cpt * 2
+        elif lenth-ptr == 0:
+            pass
+        else:
+            raise Exception
+        return result
+
+    def b642hex(self, string):
+        result = ""
+        ptr = 0
+        lenth = len(string)
+        b1 = int("111111110000000000000000", 2)
+        b2 = int("000000001111111100000000", 2)
+        b3 = int("000000000000000011111111", 2)
+        while ptr+8 <= lenth:
+                temp = string[ptr:ptr+4]
+                temp_result = 0
+                for cell in range(4):
+                    temp_result += self.b64byte.index(temp[cell]) << (6 * (3 - cell))
+                r1 = hex((temp_result & b1) >> 16)[2:]
+                r2 = hex((temp_result & b2) >> 8)[2:]
+                r3 = hex(temp_result & b3)[2:]
+                if len(r1) == 1:
+                    r1 = '0' + r1
+                if len(r2) == 1:
+                    r2 = '0' + r2
+                if len(r3) == 1:
+                    r3 = '0' + r3
+                result += r1
+                result += r2
+                result += r3
+                ptr += 4
+        if string[-1]=="=" and string[-2]=="=":
+            temp = string[ptr:ptr+2]
+            temp_result = 0
+            temp_result += self.b64byte.index(temp[0]) << 18
+            temp_result += self.b64byte.index(temp[1] >> 4) << 12
+            r1 = hex((temp_result & b1) >> 16)[2:]
+            r2 = hex((temp_result & b2) >> 8)[2:]
+            if len(r1) == 1:
+                r1 = '0' + r1
+            if len(r2) == 1:
+                r2 = '0' + r2
+            result += r1
+            result += r2
+
+        elif string[-1]=="=":
+            temp = string[ptr:ptr+3]
+            temp_result = 0
+            for cell in range(2):
+                temp_result += self.b64byte.index(temp[cell]) << (6 * (3 - cell))
+            temp_result += self.b64byte.index(temp[2] >> 2) << 6
+            r1 = hex((temp_result & b1) >> 16)[2:]
+            r2 = hex((temp_result & b2) >> 8)[2:]
+            r3 = hex(temp_result & b3)[2:]
+            if len(r1) == 1:
+                r1 = '0' + r1
+            if len(r2) == 1:
+                r2 = '0' + r2
+            if len(r3) == 1:
+                r3 = '0' + r3
+            result += r1
+            result += r2
+            result += r3
+        elif "=" not in string:
+            temp = string[ptr:ptr+4]
+            temp_result = 0
+            for cell in range(4):
+                temp_result += self.b64byte.index(temp[cell]) << (6 * (3 - cell))
+            r1 = hex((temp_result & b1) >> 16)[2:]
+            r2 = hex((temp_result & b2) >> 8)[2:]
+            r3 = hex(temp_result & b3)[2:]
+            if len(r1) == 1:
+                r1 = '0' + r1
+            if len(r2) == 1:
+                r2 = '0' + r2
+            if len(r3) == 1:
+                r3 = '0' + r3
+            result += r1
+            result += r2
+            result += r3
+        else:
+            raise Exception
+        return result
+```
+
+`RSA`加密参考stackoverflow文章[戳我](https://stackoverflow.com/questions/40094108/i-have-a-rsa-public-key-exponent-and-modulus-how-can-i-encrypt-a-string-using-p)，用了github上别人写的`JS`加密的python程序
 
 **代码**
 
