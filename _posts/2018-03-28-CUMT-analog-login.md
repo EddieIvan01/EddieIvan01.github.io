@@ -58,7 +58,7 @@ post的数据包括csrf令牌以及明文的yhm（即学号，我随便敲的）
 使用requests库的requests.session()保持会话
 
 
-## 登录逻辑：从登录页面获取csrftoken，请求login_getpublickey.html提交时间参数获取rsa密钥，对获取到的密钥base64解密，用密钥对登录密码进行rsa加密，对密文再进行base64加密，最后post
+**登录逻辑：从登录页面获取csrftoken，请求login_getpublickey.html提交时间参数获取rsa密钥，对获取到的密钥base64解码，用密钥对登录密码进行rsa加密，对密文再进行base64编码，最后post**
 
 *** 
 
