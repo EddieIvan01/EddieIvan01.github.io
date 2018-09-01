@@ -185,7 +185,7 @@ class HB64(object):
         return result
 ```
 
-`RSA`加密是`JS`中的[jsbn](https://www.npmjs.com/package/jsbn)，有`setPublicKey`方法，一样不同于python标准库，[见此](http://www-cs-students.stanford.edu/%7Etjw/jsbn/)
+`RSA`加密是`JS`中的[jsbn](https://www.npmjs.com/package/jsbn)进行大数字运算的特定加密，有`setPublicKey`方法，一样不同于python标准库，[见此](http://www-cs-students.stanford.edu/%7Etjw/jsbn/)
 
 参考stackoverflow文章[戳我](https://stackoverflow.com/questions/40094108/i-have-a-rsa-public-key-exponent-and-modulus-how-can-i-encrypt-a-string-using-p)，用了github上别人写的`JS`原生`RSA`加密的python版程序
 
