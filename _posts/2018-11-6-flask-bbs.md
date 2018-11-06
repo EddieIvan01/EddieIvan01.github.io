@@ -1,6 +1,6 @@
 ---
 layout: post
-title: Flask踩坑
+title: Flask BBS
 summary: Flask开发部署踩坑，未来学习Flask源码继续更新
 featured-img: bbs
 ---
@@ -223,3 +223,5 @@ featured-img: bbs
           }
   }
   ```
+  
++ `Gunicorn`的部署，直接`gunicorn wsgi:app`是不行的，提示找不到`app`对象，因为我的启动函数不在项目包里，而直接从包启动又没有注册蓝图。没办法看文档另一种方法创建工厂函数，改写`gunicorn 'wsgi:create_app()'`，ok
