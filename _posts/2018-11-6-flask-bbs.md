@@ -11,6 +11,9 @@ featured-img: bbs
 
 ***
 
+项目部署于：http://bbs.iv4n.xyz, 阿里云要备案所以可能暂时得http://39.105.187.104
+
+
 接下来一点一点总结踩过的坑们：
 
 + `flask_xxx`，新版的Flask扩展把`flask.ext.xxx`改为了前面那个，我觉得算退步吧，一个`ext`包模块化结构不是清晰很多吗
