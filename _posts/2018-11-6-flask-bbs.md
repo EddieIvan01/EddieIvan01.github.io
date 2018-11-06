@@ -1,0 +1,225 @@
+---
+layout: post
+title: Flask踩坑
+summary: Flask开发部署踩坑，未来学习Flask源码继续更新
+featured-img: bbs
+---
+
+最近太忙了，11月比赛真多，连着周末跑去南京比赛，上周安恒杯进国赛了下周还得去南京(want to sleep on weekends)
+
+本来在纠结学`Flask`还是`Tornado`，最后想想`Python 3`的`asyncio`库文档我一直都不咋看得懂，还是放弃异步框架吧。等以后(如果有时间)再用`Golang`写个`RSS API`
+
+***
+
+接下来一点一点总结踩过的坑们：
+
++ `flask_xxx`，新版的Flask扩展把`flask.ext.xxx`改为了前面那个，我觉得算退步吧，一个`ext`包模块化结构不是清晰很多吗
+
++ `FlaskForm`，改名了.....，忘记原来叫啥了，用错的话会有提示
+
++ `flask_login`，`user`必须要有`id`属性，因为我用了`MongoDB`所以开始没赋`id`，之后看了文档解决
+
+  ```python
+  class UserMixin(object):
+  
+      if not PY2:  # pragma: no cover
+          # Python 3 implicitly set __hash__ to None if we override __eq__
+          # We set it back to its default implementation
+          __hash__ = object.__hash__
+  
+      @property
+      def is_active(self):
+          return True
+  
+      @property
+      def is_authenticated(self):
+          return True
+  
+      @property
+      def is_anonymous(self):
+          return False
+  
+      def get_id(self):
+          try:
+              return text_type(self.id)
+          except AttributeError:
+              raise NotImplementedError('No `id` attribute - override `get_id`')
+  ```
+
++ Flask的蓝图，这个东西通俗点说就是让项目能更具模块化，比如说同类视图的实现放在同一个文件里，然后不同功能创建不同文件，但假如没有蓝图很难实现，因为涉及相互导入的问题，即a包导入b包，b包中又导入b包，而有了蓝图的话可以先实现功能，然后在项目的`__init__.py`中为`app`类注册实现功能蓝图
+
++ 相对包导入，这个写多自然就懂了。简单点说，`Python3`中使用`from .. import xxx/from ..a import xxx`这种叫做相对包导入，假如写函数库的话这样会为调用者省掉很多麻烦，但是！：一不小心报错。因为相对导入只有在包内可实现，而包必须在顶层文件夹内包含`__init__.py`，即使它为空。举例：
+
+  ```
+  /test
+  |___ a.py(内含app实例)
+  |___ /routes
+  		|___ b.py(需导入app实例)
+  ```
+
+  我在`b.py`里写`from ..a import app`，报错`ValueError: attempted relative import beyond top-level package`因为`test`本身不是一个包，所以`b.py`无法相对导入上层文件夹里的变量，解决办法：在`/test`下创建`__init__`，然后将`/test`当做包，在`/test`同级目录下创建文件调用`b.py`。在`Flask`开发时，我在项目文件夹中的`__init__.py`中实例化`app/mongo/bootstrap`，然后在项目文件夹同级创建启动文件，启动文件中再为`app`注册蓝图。假如不在外层启动的话，`__init__.py`需要导入数据库蓝图注册，而数据库蓝图文件中又需要导入`__init__.py`来实例化数据库对象，这就造成了相互导入，不报错就怪了
+
+
+
+  另外`__init__.py`中的变量是会被提到比包内文件高一层的位置上，即直接是包级文件，举个例子：
+
+  ```
+  /a
+  |___ b.py(内含class t)
+  |___ __init__.py
+  ```
+
+  这里假如我从外部导入类`t`的话需要`from a.b import t`，但假如我在`__init__.py`中写`from .b import t`，我再从外部导入就只需要`from a import t`，即把`t`提升到了包级
+
++ `flask_login`中的`user.loader`回调，文档中告诉你要实现函数：
+
+  ```python
+  @login_manager.user_loader
+  def load_user(userid):
+      return get_user_obj(userid) if xxx else None
+  ```
+
+  即通过这个函数返回`id`对应的用户对象，想想`flask_login`的内部实现就可以理解，它在内部维护了一个登录用户的实例栈，通过每个用户唯一的`id`来获取用户实例，可以阅读源码（注释写的非常清楚了）：
+
+  ```python
+  def user_loader(self, callback):
+          '''
+          This sets the callback for reloading a user from the session. The
+          function you set should take a user ID (a ``unicode``) and return a
+          user object, or ``None`` if the user does not exist.
+  
+          :param callback: The callback for retrieving a user object.
+          :type callback: callable
+          '''
+          self.user_callback = callback
+          return callback
+  
+  def reload_user(self, user=None):
+          '''
+          This set the ctx.user with the user object loaded by your customized
+          user_loader callback function, which should retrieved the user object
+          with the user_id got from session.
+  
+          Syntax example:
+          from flask_login import LoginManager
+          @login_manager.user_loader
+          def any_valid_func_name(user_id):
+              # get your user object using the given user_id,
+              # if you use SQLAlchemy, for example:
+              user_obj = User.query.get(int(user_id))
+              return user_obj
+  
+          Reason to let YOU define this self.user_callback:
+              Because we won't know how/where you will load you user object.
+          '''
+          ctx = _request_ctx_stack.top
+  
+          if user is None:
+              user_id = session.get('user_id')
+              if user_id is None:
+                  ctx.user = self.anonymous_user()
+              else:
+                  if self.user_callback is None:
+                      raise Exception(
+                          "No user_loader has been installed for this "
+                          "LoginManager. Refer to"
+                          "https://flask-login.readthedocs.io/"
+                          "en/latest/#how-it-works for more info.")
+                  user = self.user_callback(user_id)
+                  if user is None:
+                      ctx.user = self.anonymous_user()
+                  else:
+                      ctx.user = user
+          else:
+              ctx.user = user
+  ```
+
+  这里因为我用的`MongoDB`，所以网上没有现成实现，几乎都是`SqlArchemy`的，这里我给用户类添加了一个类方法
+
+  ```python
+  class BaseUser(UserMixin):
+      
+      __slots__ = ['id', 'uname', 'passwd', 'passwd_hash', 'email', 'role']
+      
+      def __init__(self, _id, uname=None, passwd=None, email=None, role="basic"):
+          self.id=_id
+          self.uname = uname
+          self.passwd = passwd
+          self.email = email
+          self.role = role
+          self.passwd_hash = hashlib.sha256(passwd.encode('utf-8')+(hashlib.md5(salt.encode("utf-8")).hexdigest()).encode("utf-8")).hexdigest()
+      
+  ## Other func
+  
+      @classmethod
+      def query(cls, user_id):
+          result = mongo.db.users.find_one({"_id": ObjectId(user_id)})
+          return cls(result["_id"], result["uname"], result["passwd"], result["email"], result["role"])
+  ```
+
++ `MongoDB`的数据库权限，`MongoDB`的未授权访问漏洞是因为未开启数据库`auth`，正确做法是先关闭`auth`然后添加数据库用户，添加`root`用户需到`admin`库，别的数据库管理员需到指定库，也就是说添加那个库权限就到哪个库执行`createUser()`(`MongoDB 3.0`以前是`addUser`)，然后开启`auth`在开放到公网，不过一般问题也不大，别监听`0.0.0.0`就行了。此外，`MongoDB`的权限也很奇怪，`dbAdmin`居然没有读写数据库权限（一直说我无权限执行函数搞得我很迷惑），只有执行管理函数的权限，而读写权限需要`readWrite`，如下：
+
+  ```javascript
+  /*
+  * Read：允许用户读取指定数据库
+  * readWrite：允许用户读写指定数据库
+  * dbAdmin：允许用户在指定数据库中执行管理函数，如索引创建、删除，查看统计或访问system.profile
+  * userAdmin：允许用户向system.users集合写入，可以找指定数据库里创建、删除和管理用户
+  * clusterAdmin：只在admin数据库中可用，赋予用户所有分片和复制集相关函数的管理权限。
+  * readAnyDatabase：只在admin数据库中可用，赋予用户所有数据库的读权限
+  * readWriteAnyDatabase：只在admin数据库中可用，赋予用户所有数据库的读写权限
+  * userAdminAnyDatabase：只在admin数据库中可用，赋予用户所有数据库的userAdmin权限
+  * dbAdminAnyDatabase：只在admin数据库中可用，赋予用户所有数据库的dbAdmin权限。
+  * root：只在admin数据库中可用。超级账号，超级权限
+  */
+  
+  > use flask
+  > db.createUser({
+        "user": "flask",
+        "pwd": "flask",
+        "roles": [
+            "role": "readWrite",
+            "db": "flask"
+        ]
+    })
+  ```
+
++ 蓝图中的`ulr_for`函数，这个函数的前缀是需要实例化蓝图时的名字的，如
+
+  ```python
+  main = Blueprint("a", __name__)
+  url_for("a.xxx")
+  ```
+
++ 头像，头像我没有保存到项目文件里然后`open()`啥的，我直接把图片二进制`base64`编码然后存进数据库了，或者其实不编码直接存也可以，因为`MongoDB`本身就是`Bson`格式存的数据，然后在后台创建了一个读取头像的`API`
+
++ `sort `分页，我这样写的`get_posts`函数：
+
+  ```python
+  def get_posts_api(limit=0, skip=0, **kwargs):
+      for i in kwargs.keys():
+          if type(i) != str or type(i) != int:
+              continue
+          kwargs[i], _ = flask_real_escape(kwargs[i])  
+      _posts = mongo.db.posts.find(kwargs).sort([("date", -1)]).skip(skip).limit(limit)
+      posts = list(_posts)
+      for i in posts:
+          i["content"] = mistune.markdown(i["content"], escape=True, hard_wrap=True)
+      return posts
+  ```
+
+  按页码`select`数据
+
++ `redirect`函数，我服务器前加了一层`Nginx`反代，因为我总觉得`Gunicorn`是个玩具，丢在公网上是在不放心，就只让它监听本地让`Nginx`去请求它。`Redirect`会返回重定向的`URL`，然后`set location`响应头，`Nginx`配置需要加上`proxy_set_header`，不然`redirect`会直接返回`127.0.0.1:2333/xxx`到用户浏览器
+
+  ```
+  server {
+          listen 80;
+          server_name 39.105.187.104;
+          location / {
+                  proxy_pass http://127.0.0.1:2333;
+                  proxy_redirect off;
+                  proxy_set_header Host $host:$server_port;
+          }
+  }
+  ```
