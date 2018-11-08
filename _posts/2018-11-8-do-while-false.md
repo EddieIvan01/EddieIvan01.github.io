@@ -18,8 +18,8 @@ do {
 
 ```c
 #define TEST_RETURN(bit, op, c_op, val)         \
-    do {								        \
-        atomic##bit##_set(&v, v0);			    \
+    do{                                         \
+        atomic##bit##_set(&v, v0);              \
         BUG_ON(atomic##bit##_read(&v) != r);    \
     } while (0)
 ```
