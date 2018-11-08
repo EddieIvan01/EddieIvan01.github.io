@@ -1,6 +1,6 @@
 ---
-title: C语言中do {...} while (0)
-summary: 最近在读源码时看到，学习到是一种经典且实用的C语言技巧
+title: C语言中do {...} while (false)
+summary: 最近在读源码时看到，学习到是一种经典且实用的多行内联宏与安全资源释放的C语言技巧
 layout: post
 featured-img: dowhile
 ---
