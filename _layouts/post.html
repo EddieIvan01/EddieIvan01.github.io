@@ -17,7 +17,8 @@ layout: compress
 {% endif %}
 
 {% include header.html %}
-
+<script async src="//dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+      
   {% if page.featured-img %}
 
   <div class="hero lazyload" data-bg="{{site.url}}/assets/img/posts/{{page.featured-img}}.jpg">
@@ -38,6 +39,9 @@ layout: compress
                   {{ words | divided_by:180 }} mins
               {% endif %} read
               &nbsp;
+          </span><br>
+          <span id="busuanzi_container_page_pv">
+          本文总阅读量<span id="busuanzi_value_page_pv"></span>次
           </span>
         </p>
       </div>
