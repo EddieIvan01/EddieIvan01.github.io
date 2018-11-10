@@ -31,6 +31,9 @@ layout: compress
             <span>
               <time>{{ page.date | date_to_string }}</time>&nbsp;
             </span>
+          <span id="busuanzi_container_page_pv">
+          本文总阅读量<span id="busuanzi_value_page_pv"></span>次
+          </span>
           <span>
               {% assign words = content | number_of_words %}
                 {% if words < 360 %}
@@ -40,9 +43,7 @@ layout: compress
               {% endif %} read
               &nbsp;
           </span><br>
-          <span id="busuanzi_container_page_pv">
-          本文总阅读量<span id="busuanzi_value_page_pv"></span>次
-          </span>
+          
         </p>
       </div>
     </div>
