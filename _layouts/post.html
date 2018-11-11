@@ -27,9 +27,10 @@ layout: compress
       <div class="hero__wrap">
         <h1 class="hero__title">{{ page.title }}</h1>
         <p class="hero__meta">
-          <span id="busuanzi_container_page_pv">
+          {% comment %}<span id="busuanzi_container_page_pv">
           本文总阅读量<span id="busuanzi_value_page_pv"></span>次
           </span><br>
+          {% end comment %}
             <span>
               <time>{{ page.date | date_to_string }}</time>&nbsp;
             </span>
