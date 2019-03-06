@@ -2,7 +2,7 @@
 layout: post
 featured-img: traffic
 title: Traffic forward
-summary: 总结流量转发，及用Python/Golang实现高效转发
+summary: 总结流量转发，以及Python/Golang的高效实现
 ---
 
 `首发于安恒公众号`
