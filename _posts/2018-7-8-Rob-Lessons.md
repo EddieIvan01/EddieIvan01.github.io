@@ -5,6 +5,18 @@ summary: Lessons Robber多线程暴力抢课脚本
 featured-img: lesson
 ---
 
+2019/2/25 更新
+
+想到更好的思路实现选课开始时立即秒杀选课，而不会因为连不上教务系统只能后期监控选课：
+
+抢课开始前十分钟维护一个TCP连接池，用一个Socks5/Http代理管理
+
+开始选课时将Http客户端代理设置为维护的代理，代理随机选取一个Tcp连接双向转发数据
+
+因为HTTP/1.1默认是keep alive connection，所以只需维护4-8个Tcp连接实现并发选课即可
+
+***
+
 **Demo**
 
 ![](https://upload-images.jianshu.io/upload_images/11356161-9d4ba3a89d6d8637.jpg?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240)
