@@ -6,5 +6,7 @@ permalink: /links/
 
 # Friendship links
 
+***
+
 ### [Fxti::Blog -> link](http://blog.fxti.xyz)
 
