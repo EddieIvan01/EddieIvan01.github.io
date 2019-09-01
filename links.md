@@ -10,3 +10,5 @@ permalink: /links/
 
 ### [Fxti::Blog -> link](http://blog.fxti.xyz)
 
+### [3ND::Blog -> link](https://3nd.xyz)
+
