@@ -2,12 +2,12 @@
 title: 浅谈并发模型
 layout: post
 featured-img: concurrency
-summary: 线程/进程与互斥锁<br />函数式<br />Promise/Future-async/await<br />Actor模型<br />CSP通信顺序模型<br />Reactor模型<br />OpenCL/OpenGL
+summary: 线程/进程与互斥锁 && 函数式 && Promise/Future/async/await && Actor模型 && CSP通信顺序模型 && Reactor模型 && OpenCL/OpenGL
 ---
 
 + 线程/进程与互斥锁
 + 函数式语言
-+ Promise/Future-async/await
++ Promise/Future/async/await
 + Actor模型
 + CSP通信顺序模型
 + Reactor模型
@@ -218,7 +218,7 @@ a = 2
 
 ***
 
-## Promise/Future-async/await
+## Promise/Future/async/await
 
 熟悉JavaScript的一定不陌生Promise，通过then方法进行异步回调及错误处理
 
