@@ -4,13 +4,11 @@ title: About
 permalink: /about/
 ---
 
-#### Iv4n
+## iv4n@BXS
 
-Web security/Web development
+web security/development
 
-email: whoami9894@gmail.com
-
-github: https://github.com/eddieivan01
+GitHub: https://github.com/eddieivan01
 
 ***
 

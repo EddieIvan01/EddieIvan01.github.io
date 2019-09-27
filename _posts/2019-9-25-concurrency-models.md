@@ -486,7 +486,7 @@ select <- c {
 
 由Acceptor接收连接，注册后由Reactor分发，最后交给Handler处理
 
-![](https://img2018.cnblogs.com/blog/371217/201812/371217-20181216205228564-867800649.png)
+![](https://eddieivan01.github.io/assets/img/concurrency-models.png)
 
 它的本质是非常高效的，例如Go的net标准库默认是一个连接起一个go-routine，虽然go-routine一个只有4KB大小，但想支持上百万连接还是会造成资源浪费，使用Reactor模型的话可以使用很少的go-routine：一个go-routine做分发，一个go-routine池做worker
 
@@ -498,6 +498,6 @@ https://github.com/Allenxuxu/gev
 
 ## OpenCL/OpenGL
 
-CPU/GPU
+CPU/GPU并行编程
 
 不懂，告辞
