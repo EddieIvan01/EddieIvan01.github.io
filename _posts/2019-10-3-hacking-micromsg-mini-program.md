@@ -7,7 +7,7 @@ layout: post
 
 前段时间迷上了一个小游戏神手，对锻炼左右脑很有好处o_o。好久没玩，下午突然想到便尝试了对其的破解（之前也写过用ADB来hack跳一跳的，不过那个算纯黑盒）
 
-微信小程序在传统意义上属于前端应用，所以本质就是不安全的。仅仅想依靠前端的混淆来隐藏源码和接口，依靠签名来保证接口不被盗用用，依靠SSL certificate来保证不被mitm是不可能的，仅仅能够增加攻击成本而已
+微信小程序在传统意义上属于前端应用，所以本质就是不安全的。仅仅想依靠前端的混淆来隐藏源码和接口，依靠签名来保证接口不被盗用用，依靠SSL certificate来保证不被mitm是不靠谱的，仅仅能够增加攻击成本而已
 
 ***
 
@@ -74,11 +74,11 @@ print(r.text)
 {"error":"\u975e\u6cd5\u8c03\u7528","code":-1}
 ```
 
-说明后端将整个query参数进行签名，所以仅仅依靠fuzz很难绕过签名校验了
+说明后端将整个query参数进行签名，因为具体参数拼接方式和是否加了salt未知，所以仅仅依靠fuzz很难通过签名校验了
 
 ***
 
-接着尝试下载小程序的源码，使用模拟器的文件管理器就可以了（root都免了）
+于是尝试下载小程序的源码，使用模拟器的文件管理器就可以了（root都免了）
 
 路径是`/data/data/com.tencent.mm/MicroMsg/[32bytes hash]/appbrand/pkg`
 
@@ -101,7 +101,7 @@ code.js:17937:        var s = this.mURL + "1.1.5/uo/report?" + util.getUrlParams
 
 定位到getUrlParams.......算了，这并不是一篇教程，所以具体怎么回溯就不细写了，太麻烦了，过程其实挺简单的
 
-写出签名脚本
+拼出签名脚本，整个逻辑也就是根据版本号选择salt，再将salt和query params拼接生成签名，将签名当作key参数
 
 ```javascript
 var md5 = require('./md5.js')
@@ -151,5 +151,36 @@ console.log(getUrlParams(p, "1.0.3"))
 ```
 
 md5.js是util库，从src里copy出来的。然后把mark改为要刷的分 * 10，把生成的query params粘贴到上面的重放脚本里就行了
+
+为了方便，合并一下
+
+```python
+import requests
+import time
+from hashlib import md5
+
+mark = 20120.872159698898
+tick = int(time.time())
+
+args = ('continue=0&help=0&id=0&level=0&'
+        'mark={}&shares=0&'
+        'tick={}&uid=xxxxx&key=').format(mark, tick)
+args = args + md5(args.encode()+b'vicky2009').hexdigest()
+
+url = 'https://mas.wanzhushipin.cn/uo/1.1.5/uo/report?' + args
+
+h = {
+        'charset': 'utf-8',
+        'Accept-Encoding': 'gzip',
+        'referer': 'https://servicewechat.com/wx3c889b4f402e924e/110/page-frame.html',
+        'content-type': 'application/x-www-form-urlencoded',
+        'User-Agent': 'Mozilla/5.0 (Linux; Android 5.1.1; google Pixel 2 Build/LMY47I; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/74.0.3729.136 Mobile Safari/537.36 MicroMessenger/7.0.6.1460(0x27000634) Process/appbrand2 NetType/WIFI Language/zh_CN',
+        'Host': 'mas.wanzhushipin.cn',
+        'Connection': 'Keep-Alive',
+}
+
+r = requests.get(url, headers=h)
+print(r.text)
+```
 
 然后就可以任意刷分了。当然，刷分并不是目的，hacking的过程才是最有趣的
