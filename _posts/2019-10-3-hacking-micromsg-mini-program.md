@@ -1,11 +1,11 @@
 ---
-title: hacking MicroMsg tiny app
-summary: 微信小程序神手的简单破解
+title: hacking MicroMsg mini program
+summary: 微信小程序——小游戏神手的简单破解
 featured-img: wx-ss
 layout: post
 ---
 
-前段时间迷上了一个小游戏神手，对锻炼左右脑很有好处o_o。好久没玩，下午突然想到便尝试了对微信小程序的破解（之前也写过用ADB来hack跳一跳的，不过那个算纯黑盒）
+前段时间迷上了一个小游戏神手，对锻炼左右脑很有好处o_o。好久没玩，下午突然想到便尝试了对其的破解（之前也写过用ADB来hack跳一跳的，不过那个算纯黑盒）
 
 微信小程序在传统意义上属于前端应用，所以本质就是不安全的。仅仅想依靠前端的混淆来隐藏源码和接口，依靠签名来保证接口不被盗用用，依靠SSL certificate来保证不被mitm是不可能的，仅仅能够增加攻击成本而已
 
