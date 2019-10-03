@@ -90,7 +90,7 @@ down下来使用`https://github.com/qwerty472123/wxappUnpacker`解包
 
 ***
 
-拿到源码发现是用Webpack打包过的。所以更好的办法装一个微信开发者工具来debug，但是抵制小程序从开发者做起，就不往磁盘里塞垃圾了
+拿到源码发现是用Webpack打包过的，应该不会有人会去硬读3W行代码。所以更好的办法装一个微信开发者工具来debug，但是抵制小程序从开发者做起，就不往磁盘里塞垃圾了
 
 `grep -rn "1.1.5/uo/report"`瞅一眼
 
@@ -99,7 +99,7 @@ PS C:\Users\40691\Desktop\wx\ss> grep -rn "1.1.5/uo/report"
 code.js:17937:        var s = this.mURL + "1.1.5/uo/report?" + util.getUrlParams(i, "1.0.3");
 ```
 
-定位到getUrlParams.......算了，具体怎么回溯就不细写了，太麻烦了，其实挺简单的，仔细点看就行了
+定位到getUrlParams.......算了，这并不是一篇教程，所以具体怎么回溯就不细写了，太麻烦了，过程其实挺简单的
 
 写出签名脚本
 
@@ -152,5 +152,4 @@ console.log(getUrlParams(p, "1.0.3"))
 
 md5.js是util库，从src里copy出来的。然后把mark改为要刷的分 * 10，把生成的query params粘贴到上面的重放脚本里就行了
 
-然后就，可以任意刷分了
-
+然后就可以任意刷分了。当然，刷分并不是目的，hacking的过程才是最有趣的
