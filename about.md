@@ -6,9 +6,13 @@ permalink: /about/
 
 ## iv4n@BXS
 
-web security/development
+Love the unknown 0/1 world
 
 GitHub: https://github.com/eddieivan01
+
+***
+
+***
 
 ***
 

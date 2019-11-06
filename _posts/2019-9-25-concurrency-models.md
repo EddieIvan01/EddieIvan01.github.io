@@ -333,6 +333,7 @@ class Spider(object):
             self._conn.connect((base_url, 80))
         except BlockingIOError:
             pass
+        
         s.register(self._conn, selectors.EVENT_WRITE, while_writable)
         yield f
         s.unregister(self._conn)
@@ -351,11 +352,13 @@ class Spider(object):
             s.register(self._conn, selectors.EVENT_READ, while_readable)
             chunk = yield f
             s.unregister(self._conn)
+            
             if chunk:
                 self._response.append(chunk)
             else:
                 url_todo.remove(self.suffix_url)
                 break
+                
         if not url_todo:
             done = True
         # return b''.join(self._response)
@@ -383,6 +386,7 @@ spiders = [Spider(url) for url in url_todo]
 fns = [s.crawl() for s in spiders]
 loop = EventLoop(*fns)
 loop.loop_until_complete()
+
 for p in spiders:
     print(p.result())
 ```
