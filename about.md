@@ -6,36 +6,6 @@ permalink: /about/
 
 ## iv4n@BXS
 
-Love the unknown 0/1 world
-
-GitHub: https://github.com/eddieivan01
-
-***
-
-***
-
-***
-
->*To follow the path:*
-
->*沿着这样一条道路：*
-
->*look to the master,*
-
->*关注大师，*
-
->*follow the master,*
-
->*跟随大师*
-
->*walk with the master,*
-
->*与大师同行，*
-
->*see through the master,*
-
->*洞察大师，*
-
->*become the master.*
-
->*成为大师。*
++ GitHub: https://github.com/eddieivan01
++ [飞天意面神](https://baike.baidu.com/item/%E9%A3%9E%E5%A4%A9%E9%9D%A2%E6%9D%A1%E7%A5%9E%E6%95%99/4879775)教徒 (bullshit
++ Love the unknown 0/1 world
