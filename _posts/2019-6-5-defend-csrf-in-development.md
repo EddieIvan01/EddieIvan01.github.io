@@ -26,17 +26,22 @@ CSRF是什么就不赘述了，不明白的自己补补课吧
 
 第一种最简单粗暴，浏览器不允许XHR修改一些会导致安全问题的请求头
 
-但它有缺点，可能会误杀，有损用户体验
+验证referer的逻辑为
 
-比如某个页面是操纵转账的`http://example.com/transfer`，基础页面存在一个转账按钮`<a href="?to=user&num=100"><button>tranfer</button></a>`
+```
+if (is_set_referer() && get_referer().host != 'domain.com') {
+    abort(403)
+}
+```
 
-这时假如验证referer来防御CSRF的话，那么基础页面（也就是不传参的页面）就无法通过URL直接访问了。当然这只是一个举例，想避免这种情况是有办法的，但当整体项目复杂后说不定那天就会跳进很久之前挖的坑里
+对于某些必须是XHR访问的接口则可以省略掉`is_set_referer`的验证。为什么需要这样设计？分两种情况：
 
-除此之外，它很容易绕过。设置`<meta name="referrer" content="never">`的referrer策略即可使页面不发送任何referrer信息
++ 不一定是XHR访问的接口，为了保证直接访问不会被ban，需要使用第一种验证逻辑。但它是不安全的，因为设置`<meta name="referrer" content="never">`的referrer策略即可使页面不发送任何referrer信息。比如我博客使用简书的图床，就是用这个方法绕过了防盗链
++ 一定是XHR访问的接口，则对应第二种逻辑，它是安全的
 
 #### 验证码
 
-当涉及敏感操作时需输入验证码，实践上没什么问题，但是我没钱买接口......
+当涉及敏感操作时需输入验证码，实践上没什么问题，但是讲道理，我觉得挺麻烦的，而且过多接口需要输入验证码的话，很影响用户体验
 
 #### SameSite头
 
@@ -45,11 +50,12 @@ CSRF是什么就不赘述了，不明白的自己补补课吧
 ```
 Set-Cookie: cookie1=xxx; SameSite=Strict
 Set-Cookie: cookie1=xxx; SameSite=Lax
+Set-Cookie: cookie1=xxx; SameSite=None
 ```
 
-以上两种方式都会禁止标签的请求携带第三方Cookie，比如`<img> <script>`等等
+以上两种方式都会禁止异步的请求携带第三方Cookie，比如`<img> <script>`的异步加载等等
 
-且Strict还会禁止开启新窗口或跳转时携带第三方Cookie，比如修改location，或a标签跳转
+且Strict还会禁止同步请求携带第三方Cookie，比如修改location，或a标签跳转
 
 该头域的细节可以看[这篇文章](https://www.cnblogs.com/ziyunfei/p/5637945.html)
 
@@ -191,13 +197,19 @@ def movie_rank():
     pass
 ```
 
+但你会发现，这个页面没法直接访问了，但好在正常情况下是通过链接进入该页面的
+
 ***
 
 ### 前后端分离
 
-最近又有一个项目，前后端分离架构，后端仅提供接口，且不同源。那么像上面的描述的Flask + Jinja模版渲染的那一套CSRF防御逻辑就行不通了
+最近又有一个项目，前后端分离架构，后端仅提供接口
 
-但可以将CSRF token放在Cookie里，让前端JS请求接口时将Cookie里的token取出放在头域或GET/POST传参中，这里有几个问题：
+那么，通过验证referer必须设置且为当前域即可
+
+如果使用CSRF token的话，可以这样：
+
+将CSRF token放在Cookie里，让前端JS请求接口时将Cookie里的token取出放在头域或GET/POST传参中，这里有几个问题：
 
 + Cookie的安全性
 + 第一次请求无Cookie时CSRF token校验失败
@@ -208,7 +220,7 @@ def movie_rank():
 
 但是由于需要前端JS操作Cookie，那么不能设置httponly选项，这样可能导致其他攻击如XSS来绕过CSRF的校验，但这就不是单纯的CSRF的防御了，所以可忽略这样微乎其微的风险。或者如果实在安全性要求很高的话，可以开一个接口来设置Cookie并发送token给客户端，接着客户端再发送请求（这样就可规避Cookie的风险，由SOP来保证攻击者无法获得token）
 
-还有一点，后端验证逻辑仅仅是Cookie中的token等于头域中的token，那么假如攻击者前端恶意篡改Cookie和头域的话即可轻松绕过验证，就比如`curl http://example.com -H "Cookie: csrf=a" -H "csrf: a"`。但这个问题是不存在的，XHR无法修改Cookie头（昨天忘了这茬被绕进去了）
+还有一点，后端验证逻辑仅仅是Cookie中的token等于头域中的token，那么假如攻击者前端恶意篡改Cookie和头域的话即可轻松绕过验证，就比如`curl http://example.com -H "Cookie: csrf=a" -H "csrf: a"`。但这个问题是不存在的，XHR无法修改Cookie头
 
 #### 第一次请求
 

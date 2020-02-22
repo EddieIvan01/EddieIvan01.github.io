@@ -2,16 +2,15 @@
 title: 浅谈并发模型
 layout: post
 featured-img: concurrency
-summary: 线程/进程与互斥锁 && 函数式 && Promise/Future/async/await && Actor模型 && CSP通信顺序模型 && Reactor模型 && OpenCL/OpenGL
+summary: 线程/进程与互斥锁 && 函数式 && Promise/Future/async/await && Actor模型 && CSP通信顺序模型 && Reactor/Proactor
 ---
 
 + 线程/进程与互斥锁
-+ 函数式语言
++ 函数式
 + Promise/Future/async/await
 + Actor模型
 + CSP通信顺序模型
-+ Reactor模型
-+ OpenCL/OpenGL
++ Reactor/Proactor
 
 ## 线程/进程与互斥锁
 
@@ -143,11 +142,11 @@ TEXT runtime∕internal∕atomic·Load64(SB), NOSPLIT, $0-12
 
 ***
 
-## 函数式语言
+## 函数式
 
-常见的函数式语言一大共同特点就是不存在"变量"，即所有的"量"都是不可变的
+常见的函数式语言一大共同特点就是不存在"变量"，即所有的数据结构都是不可变的
 
-在纯函数式语言中变量赋值后不可便，但很多函数式语言是多范式的，赋值后可改变。有的赋值称作绑定，改变变量的值则会重绑定
+在纯函数式语言中变量初始化后不可再次赋值，但很多函数式语言是多范式的，初始化后可改变。有的赋值称作绑定，改变变量的值则会重绑定
 
 C语言中`a = 2`代表将a处的4bytes内存改为2
 
@@ -484,24 +483,83 @@ select <- c {
 
 ***
 
-## Reactor模型
+## Reactor/Proactor
 
-本质就是non-blocking IO + IO multiplex
+讲道理这两个和其它的并不是一个意义上的并发模型
 
-由Acceptor接收连接，注册后由Reactor分发，最后交给Handler处理
+### Reactor
 
-![](https://eddieivan01.github.io/assets/img/concurrency-models.png)
+本质就是non-blocking IO + IO multiplex，在概念划分上属于synchronous。简单来说就是select/epoll + worker(pool)
 
-它的本质是非常高效的，例如Go的net标准库默认是一个连接起一个go-routine，虽然go-routine一个只有4KB大小，但想支持上百万连接还是会造成资源浪费，使用Reactor模型的话可以使用很少的go-routine：一个go-routine做分发，一个go-routine池做worker
+由Reactor通过select机制监控连接，收到连接后dispatch，最后交给Handler处理
 
-最近看到的一个基于Reactor模型的Go TCP网络库
+Reactor有单线程和多线程模型，单线程意味着Acceptor，Dispatcher和Handler都处于单个线程内，通过类型协作式例程的机制来处理请求
+
+多线程则是以单个线程做Acceptor和Dispatcher，而Worker则是用一个线程池来实现
+
+最近看到的一个基于Reactor模型的Go Server库
 
 https://github.com/Allenxuxu/gev 
 
-***
+![](https://eddieivan01.github.io/assets/img/reactor.png)
 
-## OpenCL/OpenGL
+Go服务端网络编程常见模型是这样：
 
-CPU/GPU并行编程
++ `net.Listener{}.Accept`获取一个`net.Conn`
++ 开启两个go-routine去分别处理读写
++ 每个go-routine分配一个buffer来收发数据
 
-不懂，告辞
+所以Reactor相对于标准模型效率会更高
+
+但个人认为Reactor模型在Go中并不是十分必要，因为线程池做处理必然会涉及到数据共享和互斥的问题，还不如标准库的逻辑来的简单
+
+### Proactor
+
+Proactor在概念上属于non-blocking + asynchronous I/O
+
+同步异步的区别在于是用户还是OS负责将数据从内核缓存加载到用户缓存
+
+举例Proactor读取数据的步骤：
+
++ Handler发起异步读操作，创建一个缓冲区和读事件一同注册到OS的内核中，接着等待操作完成事件
++ 等待过程中，OS利用内核线程执行实际的读操作，并将数据存入用户传入的缓冲区，并触发读操作完成事件
+
+而Reactor则是：
+
++ Handler发起异步读操作，在selector中注册读事件
++ 读事件就绪，Handler调用read函数读取数据
+
+这是一个Proactor模式的Go网络库：
+
+https://github.com/xtaci/gaio
+
+可以看到函数签名为
+
+```go
+Read(ctx interface{}, conn net.Conn, buf []byte) error  // 提交一个读取请求
+Write(ctx interface{}, conn net.Conn, buf []byte) error  // 提交一个发送请求
+WaitIO() (r OpResult, err error) // 等待任意请求完成
+```
+
+可以看到读写函数都提交了fd和一个数据缓冲区，WaitIO调用返回后数据就已经被拷贝到buffer中，但实际该库是用epoll/equeue做的，所以它的Proactor模型是用户态的Proactor
+
+该库作者写的开发小记：https://zhuanlan.zhihu.com/p/102890337
+
+### 同步/异步 - 阻塞/非阻塞  I/O
+
+两两组合
+
+![Synchronous blocking](https://eddieivan01.github.io/assets/img/sync-blocking.gif)
+
+![Synchronous non-blocking](https://eddieivan01.github.io/assets/img/sync-non-blocking.gif)
+
+![Asynchronous blocking](https://eddieivan01.github.io/assets/img/async-blocking.gif)
+
+![Asynchronous non-blocking](https://eddieivan01.github.io/assets/img/async-non-blocking.gif)
+
+I/O模型的另一种划分，前四种为同步I/O，最后一种是异步I/O
+
+![Asynchronous non-blocking](https://eddieivan01.github.io/assets/img/io-model.png)
+
+其实，只有IOCP是真·异步I/O，所以，epoll/kqueue对应于Reactor模式，IOCP对应于Proactor模式
+
