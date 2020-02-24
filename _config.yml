@@ -5,9 +5,7 @@ description: > # this means to ignore newlines until "baseurl:"
   Welcome to Iv4n's blog
 baseurl: "/" # the subpath of your site, e.g. /blog
 url: "https://eddieivan01.github.io" # the base hostname & protocol for your site, e.g. http://example.com
-twitter_username: Eddie_Ivan # replace with your_twitter_username or comment to remove link from footer
 github_username:  eddieivan01 # replace with your_github_username or comment to remove link from footer
-instagram_username: null # replace with your_instagram_username or comment to remove link from footer
 social:
   name: Eddie Ivan
   links:
@@ -23,7 +21,7 @@ disqus:
 
 # Build settings
 markdown: kramdown
-highlighter: pygments #rouge # or pygments or null
+highlighter: rouge # or pygments or null
 theme: jekyll-sleek
 exclude:
   - README.md
