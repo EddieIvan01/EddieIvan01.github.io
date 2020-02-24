@@ -140,6 +140,8 @@ TEXT runtime∕internal∕atomic·Load64(SB), NOSPLIT, $0-12
 	RET
 ```
 
+是不是看到了一个叫CAS的东西（CompareAndSwap）？Go的atomic包都是Lock-Free的，这里就不展开谈了
+
 ***
 
 ## 函数式
@@ -511,7 +513,7 @@ Go服务端网络编程常见模型是这样：
 
 所以Reactor相对于标准模型效率会更高
 
-但个人认为Reactor模型在Go中并不是十分必要，因为线程池做处理必然会涉及到数据共享和互斥的问题，还不如标准库的逻辑来的简单
+但个人认为Reactor模型在Go中并不是十分必要，因为线程池做处理必然会涉及到数据共享和互斥的问题，还不如标准库的逻辑来的简单。而且其实Go的net标准库就是基于epoll的non-blocking I/O封装，所以性能一般不会遇到瓶颈
 
 ### Proactor
 
@@ -541,7 +543,9 @@ Write(ctx interface{}, conn net.Conn, buf []byte) error  // 提交一个发送�
 WaitIO() (r OpResult, err error) // 等待任意请求完成
 ```
 
-可以看到读写函数都提交了fd和一个数据缓冲区，WaitIO调用返回后数据就已经被拷贝到buffer中，但实际该库是用epoll/equeue做的，所以它的Proactor模型是用户态的Proactor
+可以看到读写函数都提交了fd和一个数据缓冲区，WaitIO调用返回后数据就已经被拷贝到buffer中，但实际该库是用epoll/equeue做的，所以它的Proactor模型像是用户态的Proactor
+
+感觉Go的范式，如`io.Reader/Writer`等接口本身就有点像用户态的Proactor模型，即调用者负责创建缓冲区并传入
 
 该库作者写的开发小记：https://zhuanlan.zhihu.com/p/102890337
 
@@ -549,15 +553,23 @@ WaitIO() (r OpResult, err error) // 等待任意请求完成
 
 两两组合
 
+**Synchronous blocking**
+
 ![Synchronous blocking](https://eddieivan01.github.io/assets/img/sync-blocking.gif)
+
+**Synchronous non-blocking**
 
 ![Synchronous non-blocking](https://eddieivan01.github.io/assets/img/sync-non-blocking.gif)
 
+**Asynchronous blocking**
+
 ![Asynchronous blocking](https://eddieivan01.github.io/assets/img/async-blocking.gif)
+
+**Asynchronous non-blocking**
 
 ![Asynchronous non-blocking](https://eddieivan01.github.io/assets/img/async-non-blocking.gif)
 
-I/O模型的另一种划分，前四种为同步I/O，最后一种是异步I/O
+I/O模型在Linux下的划分，前四种为同步I/O，最后一种是异步I/O
 
 ![Asynchronous non-blocking](https://eddieivan01.github.io/assets/img/io-model.png)
 
