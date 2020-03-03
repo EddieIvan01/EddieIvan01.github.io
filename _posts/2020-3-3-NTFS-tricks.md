@@ -1,6 +1,6 @@
 ---
 layout: post
-title: Pentester的NTFS技巧搜集
+title: 「译」Pentester的NTFS技巧搜集
 featured-img: ntfs
 summary: https://sec-consult.com/en/blog/2018/06/pentesters-windows-ntfs-tricks-collection/
 ---
