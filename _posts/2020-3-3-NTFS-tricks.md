@@ -1,6 +1,6 @@
 ---
 layout: post
-title: [译]Pentester的NTFS技巧搜集
+title: Pentester的NTFS技巧搜集
 featured-img: ntfs
 summary: https://sec-consult.com/en/blog/2018/06/pentesters-windows-ntfs-tricks-collection/
 ---
@@ -25,20 +25,7 @@ NTFS Streams document：`https://docs.microsoft.com/en-us/openspecs/windows_prot
 
 像上面展示的一样，目录成功创建，而且用户可以随意在这个目录里创建文件或目录（如果管理员/程序认为这样做无权限的话，可能导致权限提升）
 
-如果应用只允许删除文件，`::$INDEX_ALLOCATION`的trick也可以用来删除目录
-
-| 2018-03-01: | Initial contact via secure@microsoft.com. Sending PGP encrypted blogpost. |
-| ----------- | ------------------------------------------------------------ |
-| 2018-03-01: | Microsoft assigned MSRC Case 43968 CRM:0461039882            |
-| 2018-03-05: | Microsoft asks to extend the disclosure deadline.            |
-| 2018-03-05: | Agreed upon the extended 90 days deadline.                   |
-| 2018-03-27: | Asked Microsoft if the vulnerabilities could be reproduced and when a patch will be available. |
-| 2018-03-28: | Microsoft confirmed that the “trick 1” vulnerability was successfully reproduced  and assigned CVE-2018-1036. The vulnerability will be fixed by 5B (May  Patch Tuesday). |
-| 2018-04-27: | Microsoft contacted us that the proposed fix lead to a regression. Microsoft asked to  extend the deadline to 2018-06-12 (June Patch Tuesday). |
-| 2018-04-30: | Informed Microsoft that the deadline gets extended to 2018-06-12. Asked Microsoft if the other tricks will also be patched. |
-| 2018-04-30: | Microsoft responded that the other tricks “will not receive a downlevel security update”. |
-| 2018-06-12: | Microsoft releases the patch (see [release here](https://portal.msrc.microsoft.com/en-us/security-guidance/advisory/CVE-2018-1036)) |
-| 2018-06-13: | Blog post release.                                           |
+如果应用只允许删除文件，`::$INDEX_ALLOCATION`的trick也可以用来删除目录                                          |
 
 ## Trick 2: 通过NTFS数据流来绕过路径限制
 
