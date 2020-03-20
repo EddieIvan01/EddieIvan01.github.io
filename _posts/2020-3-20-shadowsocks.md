@@ -30,7 +30,7 @@ https://www.zhihu.com/question/28251266/answer/1018182397
 
 针对ss这种服务型应用，sslocal和ssserver之间的通信我推荐第二种做法，因为这种长期运行的应用安全性是首要
 
-而一些端口转发工具，比如我写的[iox](https://github.com/eddieivan01/iox)，我使用的是第一种做法，而且我选择了复用IV（实际可以选择在握手时交换随机IV）。实际上这种工具被MITM的概率极小，所以性能第一。当然[iox](https://github.com/eddieivan01/iox)对UDP的转发，因为无连接 + 乱序的特性，只能是第二种做法，当然UDP已经为我分好包了
+而一些端口转发工具，比如我写的[iox](https://github.com/eddieivan01/iox)，使用的是第一种做法，而且我选择了复用IV（实际可以选择在握手时交换随机IV）。实际上这种工具被MITM的概率极小，所以性能第一。当然[iox](https://github.com/eddieivan01/iox)对UDP的转发，因为无连接 + 乱序的特性，只能是第二种做法，当然UDP已经为我分好包了
 
 ### ShadowSocks的实现存在的问题
 
@@ -56,7 +56,7 @@ def _on_read():
     self.encryptor.decrypt(data)
 ```
 
-而13L提到的问题属于slow connection，用AWVS基本都见过，它的本质就是上层应用没有自己设置超时，而是指望TCP的2 * MSL（也就是4 min）。这里的slow connection和这个实现没有任何关系，如果要解决需要心跳机制或超时机制
+而13L提到的问题属于slow connection，用过AWVS基本都见过，它的本质就是上层应用没有自己设置超时，而是指望TCP的2 * MSL（也就是4 min）。这里的slow connection和这个实现没有任何关系，如果要解决需要心跳机制或超时机制
 
 ## 对漏洞的一些思考
 
