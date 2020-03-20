@@ -1,0 +1,103 @@
+---
+layout: post
+featured-img: ss
+title: ShadowSocks重定向攻击
+summary: 关于ShadowSocks重定向攻击，说点不同的
+---
+
+## 漏洞成因/细节/危害
+
+这几点就不再赘述了，网上分析文章够多了
+
+需要提一下的是，随然网上的文章几乎都是用AES-CFB举例子，但该攻击针对的是所有不带MAC的流密码，包括ChaCha，RC4等流密码算法和OFB/CFB/CTR等工作模式。因为攻击点就出在利用随机比特流和密文做异或，却没有做完整性校验
+
+ss压根就不支持ECB/CBC等模式，一方面是这两种分组模式本身太脆弱了，另一方面是针对TCP流转发的加密，使用分组密码则需要做额外的上层分包，对性能有影响。实际上，ECB/CBC是免疫该攻击的，但没人傻到去用它，因为那叫饮鸩止渴
+
+那么，最佳实践是什么呢？选一个AEAD算法，比如AES-GCM
+
+## 网络编程的一些问题
+
+### 针对TCP流转发加密的实践
+
+我原来在知乎上回答过这样一个问题：
+
+https://www.zhihu.com/question/28251266/answer/1018182397
+
+提问者的问题在于没有理解流密码，针对这种TCP流转发的加密，有两种做法：
+
++ 对每一个Socket绑定两个Stream Cipher对象，这两个对象中保存了流密码的状态，分别负责加解密
++ 做上层分包，比如`[LEN] [IV] [DATA]`，LEN给2 bytes（TCP MSS），IV给16 bytes。因为TCP流read API的特性，返回的长度是个不确定值。这种做法的安全性是高于前者的，但相应的性能会有所下降
+
+针对ss这种服务型应用，sslocal和ssserver之间的通信我推荐第二种做法，因为这种长期运行的应用安全性是首要
+
+而一些端口转发工具，比如我写的[iox](https://github.com/eddieivan01/iox)，我使用的是第一种做法，而且我选择了复用IV（实际可以选择在握手时交换随机IV）。实际上这种工具被MITM的概率极小，所以性能第一。当然[iox](https://github.com/eddieivan01/iox)对UDP的转发，因为无连接 + 乱序的特性，只能是第二种做法，当然UDP已经为我分好包了
+
+### ShadowSocks的实现存在的问题
+
+我在学习重定向漏洞时顺带读了ShadowSocks v2.8.2源码，一大亮点是作者将不同系统的多路复用都抽象到了同一个接口的EventLoop中
+
+我在读源码的过程中发现了一些实现上的问题，详情可见我在V2EX上发的帖：
+
+https://www.v2ex.com/t/653962
+
+谈一下13L提的问题
+
+其实解决这个实现问题很简单，为IV设置一个buffer即可。因为ss的实现是异步的EventLoop，所以在检查IV小于16 bytes时直接return并等待下一次ON_READ事件即可，不需要像13L说的那样内部写一个循环
+
+```python
+def _on_read():
+    data = self._socks.read(BUF_SIZE)
+    if self.decipher is None:
+        if len(data) + len(self._iv_buf) < 0x10:
+        	self._iv_buf += data
+            return
+    	else:
+            data = self._iv_buf + data
+    self.encryptor.decrypt(data)
+```
+
+而13L提到的问题属于slow connection，用AWVS基本都见过，它的本质就是上层应用没有自己设置超时，而是指望TCP的2 * MSL（也就是4 min）。这里的slow connection和这个实现没有任何关系，如果要解决需要心跳机制或超时机制
+
+## 对漏洞的一些思考
+
+### 利用场景
+
+网上的分析中大多是通过已知HTTP响应的前7 bytes（`HTTP/1.`）解密，那么能否尝试解密请求的数据包呢？在某些情形下是可以的，但通用性远不如解密响应
+
+我们假设这样一种情况，网关处截获了Bob的所有通信流量，但都是通过ss加密的。攻击者想解密拿到他请求Google搜索的某关键字，该怎么做？先通过明文密文异或拿到`enc_iv`（这里的明文可能是domain，也可能是IP，具体看type字段。是IP的情况下还需考虑CDN的情况，从流量包里找DNS请求的response比较稳妥），然后将监听地址和`enc_iv`异或生成payload，接着暴力尝试所有的请求密文即可解密出所有发往Google的请求
+
+### 加密算法不变的前提下修复漏洞
+
+能否在加密算法不变的前提下修复漏洞？
+
+ShadowSocks协议过于简陋，尝试修改协议可以吗？比如全部基于Socks5协议，sslocal只做流量加密转发，ssserver解密流量后做正常的Socks5服务端。我在[iox](https://github.com/eddieivan01/iox)的README里写，可以将它当ShadowSocks用，它使用的就是上述逻辑（因为加密只是工具的一个附加项，所以必需这样设计），这里我截取[iox](https://github.com/eddieivan01/iox)的加密通信数据，尝试能否重定向攻击：
+
+```
+-> 4d25107e
+<- 4d27
+-> 135aedf2ffaaba384f30
+<- 157f165a2d5b237ac137
+->7fde6040f33664c1b75db6a003b2d75f70b0819e177c129ccb616c26580df8dd9e8e4ad1bc250ea2185182278b39a8220b5d7eea83063c023ba70abdd5fe32d243c92df0dc2cdfe557
+<- ...
+```
+
+Socks5报文中指定连接目标的是客户端第二个握手报文的第五个字节开始到结束，也就是`ffaaba384f30`。很不幸，这里的明文依旧是攻击者可控的，即使Socks5握手协议的两端是不对称的，但这并不影响，在知道原始目标的情况下，攻击者依然可以解密所有数据
+
+两种可行的方法：
+
+1. 为协议添加签名字段（当然，需要先签名再加密，否则无效），这和使用AEAD算法本质是相同的
+
+2. 为协议加混淆，如果是我，我会把协议设计成这样：
+
+   ```
+   | type | offset | target and obscure | data |
+   |-------------------------------------------|
+   |  1   |   6    |         256        |      |
+   ```
+
+   在第一次请求发送连接目标时，随机生成256 bytes的混淆数据，然后将实际6 bytes的target放在6个随机的offset中
+
+   因为数据是加密的，所以攻击者是不知道offset明文的，因此攻击者也没有办法控制offset解密后的明文。在无法控制offset解密后的明文且不知道offset原始明文的情况下，攻击者即使知道原始target明文，但由于无法确定target密文，所以也无法控制解密后的target明文
+
+   攻击者如果暴力尝试的话，最坏情况下需尝试`256 ^ 6`也就是`2 ^ 48`次
+
