@@ -2,7 +2,7 @@
 layout: post
 title: Java Security
 featured-img: java
-summary: 系统学习爪哇安全
+summary: 系统学习，作个人备忘
 ---
 
 + [Java基础](#java基础)
