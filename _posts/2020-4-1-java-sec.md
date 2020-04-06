@@ -413,7 +413,7 @@ RMI存在动态类加载行为，即会先从本地CLASSPATH加载，如无则�
 
 ## LDAP
 
-JNDI与LDAP交互需要几个特殊属性：`javaCodeBase、objectClass、javaFactory、javaSerializedData、javaRemoteLocation`
+JNDI与LDAP交互需要几个特殊属性：`javaCodeBase、objectClass、javaFactory、javaSerializedData、javaRemoteLocation`，后文结合JNDI细说
 
 ```
 objectClass = 'javaNamingReference'
@@ -423,7 +423,7 @@ javaClassName = 'EvilClass'
 javaSerializedData
 ```
 
-## JDNI
+## JNDI
 
 JNDI是Java的API，是一个上层封装。下层是RMI（JRMP协议传输）和LDAP等的具体实现（还有DNS，COBRA，IIOP等等）。本质就是在实现RPC（cross JVM）
 
@@ -777,6 +777,8 @@ if (clazz == Class.class) {
 ```
 
 由于`TypeUtils.loadClass`会进行缓存，再次执行到第二段payload时，在`checkAutoType`中，直接`TypeUtils.getClassFromMapping`从缓存中获取到了`JdbcRowSetImpl`
+
+同时，由于FJ的字符解析规则，`@type`可这样写`@\u0074ype`/`@\x74ype`
 
 # References
 
