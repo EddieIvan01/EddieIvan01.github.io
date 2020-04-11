@@ -50,12 +50,14 @@ if (is_set_referer() && get_referer().host != 'domain.com') {
 ```
 Set-Cookie: cookie1=xxx; SameSite=Strict
 Set-Cookie: cookie1=xxx; SameSite=Lax
-Set-Cookie: cookie1=xxx; SameSite=None
+Set-Cookie: cookie1=xxx; SameSite=None  // 等于没设置
 ```
 
 以上两种方式都会禁止异步的请求携带第三方Cookie，比如`<img> <script>`的异步加载等等
 
-且Strict还会禁止同步请求携带第三方Cookie，比如修改location，或a标签跳转
+且Strict还会禁止同步请求携带第三方Cookie，比如a标签跳转
+
+当然这里的第三方Cookie是以Cookie的同源判定的，即domain + path，所以同域名不同端口通信，SameSite是完全不影响的（XHR跨域请求还需要设置`withCredentials`，所以针对XHR跨域，需要满足AND条件才会携带Cookie）
 
 该头域的细节可以看[这篇文章](https://www.cnblogs.com/ziyunfei/p/5637945.html)
 
@@ -65,7 +67,7 @@ Set-Cookie: cookie1=xxx; SameSite=None
 
 当使用类似Flask + Jinja的服务端渲染模型时，需要在Cookie（Session）中存放一个CSRF token，在渲染表单时将token渲染为一个hidden的表单项，然后表单提交后在服务端进行验证
 
-有SOP的限制，恶意站点的JS无法拿到CSRF token，对付CSRF可谓绰绰有余（假如有其他漏洞，如绕过浏览器同源策略的话，就不是局限于CSRF了）
+有SOP的限制，恶意站点的JS无法拿到CSRF token
 
 ***
 
@@ -209,30 +211,13 @@ def movie_rank():
 
 如果使用CSRF token的话，可以这样：
 
-将CSRF token放在Cookie里，让前端JS请求接口时将Cookie里的token取出放在头域或GET/POST传参中，这里有几个问题：
+将CSRF token放在Cookie里，让前端JS请求接口时将Cookie里的token取出放在请求头或GET/POST参数中
 
-+ Cookie的安全性
-+ 第一次请求无Cookie时CSRF token校验失败
-
-#### Cookie的安全性
-
-由于SOP的存在，跨域站点无法访问其它域的`DOM，Cookie，localStorage`等等，那么将CSRF token明文存在Cookie里是完全没有问题的
-
-但是由于需要前端JS操作Cookie，那么不能设置httponly选项，这样可能导致其他攻击如XSS来绕过CSRF的校验，但这就不是单纯的CSRF的防御了，所以可忽略这样微乎其微的风险。或者如果实在安全性要求很高的话，可以开一个接口来设置Cookie并发送token给客户端，接着客户端再发送请求（这样就可规避Cookie的风险，由SOP来保证攻击者无法获得token）
-
-还有一点，后端验证逻辑仅仅是Cookie中的token等于头域中的token，那么假如攻击者前端恶意篡改Cookie和头域的话即可轻松绕过验证，就比如`curl http://example.com -H "Cookie: csrf=a" -H "csrf: a"`。但这个问题是不存在的，XHR无法修改Cookie头
-
-#### 第一次请求
-
-用户第一次请求时，没有Cookie那么第一次校验势必不通过，那么就会导致每隔一段时间（Cookie过期）第一次的访问就会异常，这是很影响用户体验的。所以我想了以下几种办法来规避
-
-+ 提供一个`/get-token`接口，每次发送请求前都先请求这个接口来获取Cookie。缺点很明显，请求数直接乘以2
-+ 由前端控制，当CSRF校验不通过时重发请求。相比上一个方法要更好，但还是不算完美，有补丁性质
-+ 只在私密的API中验证CSRF token，而其它不需鉴权的API就可以设置Cookie。因为按用户习惯，一般不会上来就访问私密接口发请求的。比如我将CSRF token随登录成功后一起发送给浏览器（其实我一直认为登录注册页面完全没必要验证CSRF，因为危害很有限），且设置token和鉴权cookie的expire相同，接着登录后的敏感接口操作都验证CSRF token。这样就保证了用户的私密请求都有CSRF token，不会影响用户体验
+由于SOP的存在，跨域站点无法访问其它域的`DOM，Cookie，localStorage`等等，那么将CSRF token明文存在Cookie里是完全没有问题的。但是由于需要前端JS操作Cookie，那么不能设置httponly选项，这样可能导致其他攻击如XSS来绕过CSRF的校验，但这就不是单纯的CSRF的防御了
 
 ***
 
-基于第三种方法我写了一个gin框架的中间件来防范CSRF attack，其他语言框架使用请求的hook函数也很容易实现
+我写了一个gin框架的中间件来设置CSRF token，其他语言框架使用请求的hook函数也很容易实现。不过我还是觉得校验referer最简单
 
 ```go
 package xcsrf
@@ -345,9 +330,9 @@ func main(){
 
     // custom the CSRF token config as you like
     csrf.TokenLength = 32
-	csrf.TokenKey = "the-key-name"
-	csrf.TokenCookie = "the-cookie-name"
-	csrf.DefaultExpire = 3600 * 6
+    csrf.TokenKey = "the-key-name"
+    csrf.TokenCookie = "the-cookie-name"
+    csrf.DefaultExpire = 3600 * 6
     csrf.RandomSec = false
     
     // every site will set cookie

