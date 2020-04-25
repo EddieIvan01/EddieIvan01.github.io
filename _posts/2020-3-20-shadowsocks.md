@@ -99,9 +99,9 @@ BenchmarkAESCBCEncrypt1K-4        122776              9504 ns/op         107.74 
 BenchmarkAESCBCDecrypt1K-4        106448             11046 ns/op          92.70 MB/s
 ```
 
-看到了吗，AMD64下AES-GCM简直是吊打AES-CTR，将近5X-6X，而i386下AES-GCM瞬间gg了
+看到了吗，AMD64下AES-GCM简直是吊打AES-CTR，将近5X-6X，而i386下AES-GCM简直惨不忍睹
 
-最初看到肯定有疑惑，GCM = CTR + GHASH，理应比CTR慢。但实际上Go标准库里，如果CPU有AES指令集，会使用AESENC指令加速，当然，仅仅GCM有这个待遇，所以你看到的速度比较实际是硬件加速的GCM和pure Go实现的其它工作模式之间的比较。而对GCM的优化也仅仅针对了AMD64、ARM64等架构
+最初看到肯定有疑惑，GCM = CTR + GHASH，理应比CTR慢。但实际上Go标准库里，如果CPU有AES指令集，会使用AESENC指令加速，当然，仅仅GCM有这个待遇，所以你看到的速度比较实际是硬件加速的GCM和pure Go的其它工作模式之间的比较。而对GCM的优化也仅仅针对了AMD64、ARM64等架构，所以其他架构平台下也是pure Go的性能
 
 ```
 $ ls src/crypto/aes/*.s
@@ -111,6 +111,43 @@ asm_amd64.s  asm_arm64.s  asm_ppc64le.s  asm_s390x.s  gcm_amd64.s  gcm_arm64.s
 而AES-GCM在Go中是AEAD接口，提供的API并不是流密码的形式，并且需要额外一倍的内存开销（没办法`XORKeyStream(bs, bs)`）
 
 所以在Go里，如果不需要AEAD算法，建议使用Xchacha20(https://github.com/Yawning/chacha20)，经测试在AMD64 & i386下都是4X faster than AES-CTR；如果需要AEAD算法且不在上述两种架构下，建议自己实现
+
+加上ChaCha20的benchmark
+
+```
+goos: windows
+goarch: amd64
+BenchmarkAESGCMSeal1K-4          3880944               308 ns/op        3326.14 MB/s
+BenchmarkAESGCMOpen1K-4          4092999               290 ns/op        3525.53 MB/s
+BenchmarkAESGCMSeal8K-4           600762              1849 ns/op        4429.61 MB/s
+BenchmarkAESGCMOpen8K-4           632307              1828 ns/op        4481.21 MB/s
+BenchmarkAESGCMSeal32K-4          164750              7034 ns/op        4658.32 MB/s
+BenchmarkAESGCMOpen32K-4          169389              6871 ns/op        4768.88 MB/s
+BenchmarkAESCTR1K-4               752043              1408 ns/op         723.51 MB/s
+BenchmarkAESCTR8K-4               105513             11078 ns/op         739.05 MB/s
+BenchmarkAESCTR32K-4               26914             44505 ns/op         736.17 MB/s
+BenchmarkChacha201K-4            1000000              1083 ns/op         940.83 MB/s
+BenchmarkChacha208K-4             300565              3942 ns/op        2076.80 MB/s
+BenchmarkChacha2032K-4             85921             13720 ns/op        2387.96 MB/s
+
+
+goos: windows
+goarch: 386
+BenchmarkAESGCMSeal1K-4            56220             21181 ns/op          48.35 MB/s
+BenchmarkAESGCMOpen1K-4            56224             21535 ns/op          47.55 MB/s
+BenchmarkAESGCMSeal8K-4             6332            166170 ns/op          49.30 MB/s
+BenchmarkAESGCMOpen8K-4             7063            167895 ns/op          48.79 MB/s
+BenchmarkAESGCMSeal32K-4            1693            667421 ns/op          49.10 MB/s
+BenchmarkAESGCMOpen32K-4            1718            660650 ns/op          49.60 MB/s
+BenchmarkAESCTR1K-4               132240              9035 ns/op         112.78 MB/s
+BenchmarkAESCTR8K-4                16527             72232 ns/op         113.34 MB/s
+BenchmarkAESCTR32K-4                4009            288576 ns/op         113.53 MB/s
+BenchmarkChacha201K-4             343777              3426 ns/op         297.41 MB/s
+BenchmarkChacha208K-4              48712             24447 ns/op         334.89 MB/s
+BenchmarkChacha2032K-4             12442             95950 ns/op         341.46 MB/s
+```
+
+
 
 ## 对漏洞的一些思考
 
