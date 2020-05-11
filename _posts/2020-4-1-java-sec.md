@@ -563,6 +563,16 @@ LDAP：
   Registry注册的接口存在以Object为参数的方法，远程调用时即可传递序列化的Object参数
 
   因为JEP290防护的仅仅是`Registry`，而处理远程调用的是`Service Provider`，没有反序列化白名单
+  
++ 某些高版本的`org.apache.xalan`会限制TemplatesImpl的反序列化，而ysoserial的gadget有不少是基于TemplatesImpl
+
+  ```
+  java.lang.UnsupportedOperationException: When Java security is enabled, support for deserializing TemplatesImpl is disabled.This can be overridden by setting the jdk.xml.enableTemplatesImplDeserialization system property to true.
+  
+  at com.sun.org.apache.xalan.internal.xsltc.trax.TemplatesImpl.readObject(TemplatesImpl.java:204)
+  ```
+
+  
 
 ## Gadgets
 
