@@ -5,6 +5,10 @@ featured-img: potato
 summary: 对Potato家族(Potato/RottenPotato/JuicyPotato/PrintSpoofer/RoguePotato)滥用SeImpersonate特权本地提权细节的研究
 ---
 
+```
+首发于先知社区
+```
+
 + Feature or vulnerability
 + SeImpersonate & SeAssignPrimaryToken Privilege
 + How to get a high-privilege token
@@ -940,7 +944,7 @@ Windows的HANDLE本质是个有引用计数的智能指针。且管道的`read/w
 
 另一个需要注意的点是，`ReadFile`获取的是`char*`而不是`wchar_t*`
 
-踩的一个坑是，`CreateProcessAsUser`创建的子进程没有办法通过匿名管道拿到输出，也就是命令执行完成后读取pipe还是会阻塞（无数据写入）
+踩的一个坑是，`CreateProcessAsUser`创建的子进程没有办法通过匿名管道拿到输出，命令执行完成后读取pipe还是会阻塞（无数据写入）
 
 可以看到有人有同样的问题 https://bbs.csdn.net/topics/392036125
 
