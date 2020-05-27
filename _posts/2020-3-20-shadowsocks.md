@@ -30,7 +30,7 @@ https://www.zhihu.com/question/28251266/answer/1018182397
 
 针对ss这种服务型应用，sslocal和ssserver之间的通信我推荐第二种做法，因为这种长期运行的应用安全性是首要
 
-而一些端口转发工具，比如我写的[iox](https://github.com/eddieivan01/iox)，使用的是第一种做法，而且我选择了复用IV（实际可以选择在握手时交换随机IV）。实际上这种工具的加密功能仅仅为了绕过IDS等设备，所以没必要增加额外损耗。当然[iox](https://github.com/eddieivan01/iox)对UDP的转发，因为无连接 + 乱序的特性，只能是第二种做法，当然UDP已经为我分好包了
+而一些端口转发工具，比如我写的[iox](https://github.com/eddieivan01/iox)，使用的是第一种做法，而且选择了复用IV（还可以选择在握手时交换随机IV）。实际上这种工具的加密功能仅仅为了绕过IDS等设备，所以没必要增加额外损耗。当然[iox](https://github.com/eddieivan01/iox)对UDP的转发，因为无连接 + 乱序的特性，只能是第二种做法，当然UDP已经为我分好包了
 
 ### ShadowSocks的实现存在的问题
 
@@ -57,6 +57,133 @@ def _on_read():
 ```
 
 而13L提到的问题属于slow connection，用过AWVS基本都见过，它的本质就是上层应用没有自己设置超时，而是指望TCP的2 * MSL（也就是4 min）。这里的slow connection和这个实现没有任何关系，如果要解决需要心跳机制或超时机制
+
+### 关于Golang的Socket Write API
+
+写过Unix C socket的都知道，write调用不保证把buf的数据全部拷贝到内核的协议栈缓冲区，开发者需要自行判断是否写完，一般需要写一个循环：
+
+```c
+int sent = 0;
+int total = strlen(buf);
+
+while (sent < total) {
+    int written = write(sock, buf + send, total - sent);
+    if (written < 0) 
+        show_error();
+    if (written == 0)
+        break;
+    sent += written;
+}
+```
+
+而Go的`net.TCPConn.Write`一般是
+
+```go
+_, err := conn.Write([]byte{0, 0})
+if err != nil {}
+```
+
+不需要自己写循环，看看`src/internal/poll/fd_*.go`的实现
+
+`fd_unix`中
+
+```go
+func (fd *FD) Write(p []byte) (int, error) {
+	if err := fd.writeLock(); err != nil {
+		return 0, err
+	}
+	defer fd.writeUnlock()
+	if err := fd.pd.prepareWrite(fd.isFile); err != nil {
+		return 0, err
+	}
+	var nn int
+	for {
+		max := len(p)
+		if fd.IsStream && max-nn > maxRW {
+			max = nn + maxRW
+		}
+		n, err := syscall.Write(fd.Sysfd, p[nn:max])
+		if n > 0 {
+			nn += n
+		}
+		if nn == len(p) {
+			return nn, err
+		}
+		if err == syscall.EAGAIN && fd.pd.pollable() {
+			if err = fd.pd.waitWrite(fd.isFile); err == nil {
+				continue
+			}
+		}
+		if err != nil {
+			return nn, err
+		}
+		if n == 0 {
+			return nn, io.ErrUnexpectedEOF
+		}
+	}
+}
+```
+
+`fd_windows`中
+
+```go
+func (fd *FD) Write(buf []byte) (int, error) {
+	if err := fd.writeLock(); err != nil {
+		return 0, err
+	}
+	defer fd.writeUnlock()
+	if fd.isFile {
+		fd.l.Lock()
+		defer fd.l.Unlock()
+	}
+
+	ntotal := 0
+	for len(buf) > 0 {
+		b := buf
+		if len(b) > maxRW {
+			b = b[:maxRW]
+		}
+		var n int
+		var err error
+		if fd.isFile {
+			switch fd.kind {
+			case kindConsole:
+				n, err = fd.writeConsole(b)
+			default:
+				n, err = syscall.Write(fd.Sysfd, b)
+				if fd.kind == kindPipe && err == syscall.ERROR_OPERATION_ABORTED {
+					// Close uses CancelIoEx to interrupt concurrent I/O for pipes.
+					// If the fd is a pipe and the Write was interrupted by CancelIoEx,
+					// we assume it is interrupted by Close.
+					err = ErrFileClosing
+				}
+			}
+			if err != nil {
+				n = 0
+			}
+		} else {
+			if race.Enabled {
+				race.ReleaseMerge(unsafe.Pointer(&ioSync))
+			}
+			o := &fd.wop
+			o.InitBuf(b)
+			n, err = wsrv.ExecIO(o, func(o *operation) error {
+				return syscall.WSASend(o.fd.Sysfd, &o.buf, 1, &o.qty, 0, &o.o, nil)
+			})
+		}
+		ntotal += n
+		if err != nil {
+			return ntotal, err
+		}
+		buf = buf[n:]
+	}
+	return ntotal, nil
+}
+```
+
+两种系统下的实现都加了锁，并且在内部写了循环（不同的是Windows WSA有一些更复杂的判断），保证一次Write调用写入buffer的所有数据，否则返回`err != nil`
+
+一般来说`err != nil`是因为诸如断网等原因，即使内核协议栈缓冲区满了，也只会阻塞Write而不是返回err，所以可以看到在`io.Copy`中当Write返回`err != nil`或者`nread != nwrite`时会直接break and return
 
 ### 关于Golang crypto标准库
 
@@ -99,7 +226,7 @@ BenchmarkAESCBCEncrypt1K-4        122776              9504 ns/op         107.74 
 BenchmarkAESCBCDecrypt1K-4        106448             11046 ns/op          92.70 MB/s
 ```
 
-看到了吗，AMD64下AES-GCM简直是吊打AES-CTR，将近5X-6X，而i386下AES-GCM简直惨不忍睹
+看到了吗，AMD64下AES-GCM简直是吊打AES-CTR，将近5X-6X，而i386下AES-GCM却惨不忍睹
 
 最初看到肯定有疑惑，GCM = CTR + GHASH，理应比CTR慢。但实际上Go标准库里，如果CPU有AES指令集，会使用AESENC指令加速，当然，仅仅GCM有这个待遇，所以你看到的速度比较实际是硬件加速的GCM和pure Go的其它工作模式之间的比较。而对GCM的优化也仅仅针对了AMD64、ARM64等架构，所以其他架构平台下也是pure Go的性能
 

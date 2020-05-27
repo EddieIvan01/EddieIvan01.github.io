@@ -23,11 +23,11 @@ TL; DR
 
 本文相关的代码可以在https://github.com/EddieIvan01/gld/tree/master/sample找到
 
-# 在C/Cpp中动态加载shellcode
+## 在C/Cpp中动态加载shellcode
 
 简述C/Cpp动态加载shellcode
 
-## Cast char array ptr to function ptr
+### Cast char array ptr to function ptr
 
 低版本系统中将函数指针指向shellcode数据段就OK了，或者在VS编译X86时嵌入asm
 
@@ -50,7 +50,7 @@ int main() {
 }
 ```
 
-## Win32API VirtualProtect
+### Win32API VirtualProtect
 
 高版本中默认开启DEP(Data Execution Prevention)，数据段默认仅有RW权限，代码段默认是READONLY权限
 
@@ -92,7 +92,7 @@ fn();
 #pragma comment(linker, "/section:.data,RWE")
 ```
 
-## Win32API VirtualAlloc
+### Win32API VirtualAlloc
 
 另一种方法：使用VirtualAlloc分配指定权限的内存块
 
@@ -112,9 +112,9 @@ memcpy(lpAlloc, buf, sizeof buf);
 ((void(*)())lpAlloc)();
 ```
 
-# 在Go中动态加载shellcode
+## 在Go中动态加载shellcode
 
-## Invoke VirtualProtect & VirtualAlloc in Go
+### Invoke VirtualProtect & VirtualAlloc in Go
 
 通过Go加载shellcode效果很不错，stageless shellcode能轻松过360和火绒，VirusTotal基本6/70左右的查杀率
 
@@ -159,7 +159,7 @@ memcpy(addr, buf)
 syscall.Syscall(addr, 0, 0, 0, 0)
 ```
 
-## Execute shellcode by syscall.Syscall
+### Execute shellcode by syscall.Syscall
 
 看到上面两个例子都是通过`syscall.Syscall`执行shellcode
 
@@ -169,7 +169,7 @@ syscall.Syscall(uintptr(unsafe.Pointer(&buf[0])), 0, 0, 0, 0)
 
 `syscall.Syscall`实际链接了`runtime/syscall_windows.go`中的`syscall_Syscall`函数，是通过CGO来调用的。CGO有很多缺点，包括性能问题，无法交叉编译，无法完全静态编译，所以我希望通过pointer cast来调用
 
-## Cast byte array ptr to function ptr in Go
+### Cast byte array ptr to function ptr in Go
 
 Go也有指针，能否像C/Cpp一样`(*((void(*)(void))&buf))()`来调用shellcode？
 
@@ -185,7 +185,7 @@ C/Cpp里之所以可以通过强转指针来执行，是因为C/Cpp这种原始�
 
 Go里的函数是个first-class，而且函数对象中并不仅仅包含指针，还包含defer定义的函数栈，所以我们将byte array的指针强转为函数指针这种做法自然不行
 
-## Go runtime中的函数元信息结构
+### Go runtime中的函数元信息结构
 
 实际上Go中的函数对象在runtime中的数据结构是这样（src/runtime/runtime2.go），和slice相同，第一个成员都是指针
 
@@ -273,7 +273,7 @@ info.entry = (uintptr)(unsafe.Pointer(&buf[0]))
 
 但修改后并不能覆盖f，因为`_func`并不是实际的first-class对象，而只是runtime用来记录函数元信息的结构
 
-## Go中的first-class函数对象是一个双重指针
+### Go中的first-class函数对象是一个双重指针
 
 IDA里跟踪以下代码输出的地址
 
@@ -376,7 +376,7 @@ virtualProtect.Call(
 **(**uintptr)(unsafe.Pointer(&f)) = (uintptr)(unsafe.Pointer(&buf[0]))
 ```
 
-# ShellCode Loader
+## ShellCode Loader
 
 实现一个加载器很简单，将shellcode加密后动态加载
 
