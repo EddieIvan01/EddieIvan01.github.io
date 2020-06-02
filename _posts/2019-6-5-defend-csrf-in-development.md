@@ -32,12 +32,18 @@ CSRF是什么就不赘述了，不明白的自己补补课吧
 if (is_set_referer() && get_referer().host != 'domain.com') {
     abort(403)
 }
+
+OR 
+
+if (!is_set_referer() || get_referer().host != 'domain.com') {
+    abort(403)
+}
 ```
 
-对于某些必须是XHR访问的接口则可以省略掉`is_set_referer`的验证。为什么需要这样设计？分两种情况：
+为什么需要这样设计？分两种情况：
 
 + 不一定是XHR访问的接口，为了保证直接访问不会被ban，需要使用第一种验证逻辑。但它是不安全的，因为设置`<meta name="referrer" content="never">`的referrer策略即可使页面不发送任何referrer信息。比如我博客使用简书的图床，就是用这个方法绕过了防盗链
-+ 一定是XHR访问的接口，则对应第二种逻辑，它是安全的
++ 对于一定是XHR访问的接口，则对应第二种逻辑，它是安全的
 
 #### 验证码
 
