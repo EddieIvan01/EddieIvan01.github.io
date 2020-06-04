@@ -45,11 +45,17 @@ layout: compress
     </div>
   </div>
 
-  <main class="site__content">    
+  <main class="site__content">
+    <h2>目录<p id="toc-ctl">[Show/Hide]</p></h2>
     <div class="container">
       <article class="post-content" itemprop="articleBody">
-        <ol data-toc="div.container" data-toc-headings="h2,h3,h4"></ol>
-        <br />
+        <ul id="toc-container" data-toc="div.container" data-toc-headings="h2,h3,h4"></ul>
+        <hr>
+        <script>
+        $("#toc-ctl").click(function(){
+            $("#toc-container").toggle();
+        });
+        </script>
         {{ content }}
 
       </article>
