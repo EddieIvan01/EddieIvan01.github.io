@@ -46,12 +46,12 @@ layout: compress
   </div>
 
   <main class="site__content">
-    <h2 style="text-align:center">目录<a href="javascript:toggle()">[CTL]</a></h2>
-    <ul id="toc-container" data-toc="div.container" data-toc-headings="h2,h3,h4"></ul>
-    <script>function toggle() {$('#toc-container').toggle()}</script>
-    <hr>
     <div class="container">
       <article class="post-content" itemprop="articleBody">
+        <h5 style="font-size:200%><a href="javascript:toggle()">[CTL]</a></h5>
+        <ul id="toc-container" data-toc="div.container" data-toc-headings="h2,h3,h4"></ul>
+        <script>function toggle() {$('#toc-container').toggle()}</script>
+        <hr>
         {{ content }}
       </article>
       <div class="post-content controls__inner">
