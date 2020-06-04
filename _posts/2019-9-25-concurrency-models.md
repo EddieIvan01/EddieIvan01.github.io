@@ -2,15 +2,8 @@
 title: 浅谈并发模型
 layout: post
 featured-img: concurrency
-summary: 线程/进程与互斥锁 && 函数式 && Promise/Future/async/await && Actor模型 && CSP通信顺序模型 && Reactor/Proactor
+summary: 线程/进程与互斥锁 & 函数式 & Promise/Future/async/await & Actor模型 & CSP通信顺序模型 & Reactor/Proactor
 ---
-
-+ 线程/进程与互斥锁
-+ 函数式
-+ Promise/Future/async/await
-+ Actor模型
-+ CSP通信顺序模型
-+ Reactor/Proactor
 
 ## 线程/进程与互斥锁
 

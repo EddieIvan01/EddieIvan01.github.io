@@ -9,34 +9,6 @@ summary: 对Potato家族(Potato/RottenPotato/JuicyPotato/PrintSpoofer/RoguePotat
 首发于先知社区
 ```
 
-+ Feature or vulnerability
-+ SeImpersonate & SeAssignPrimaryToken Privilege
-+ How to get a high-privilege token
-  + Origin Potato
-  + RottenPotato & JuicyPotato
-  + PrintSpoofer (or PipePotato or BadPotato)
-  + RoguePotato
-  + SweetPotato
-+ Details
-  + PrintSpoofer
-    + CheckAndEnablePrivilege
-    + CreateSpoolNamedPipe
-    + TriggerNamedPipeConnection
-    + ImpersonateNamedPipeClient
-    + DuplicateTokenEx
-    + CreateProcessAsUserW & CreateProcessWithTokenW
-  + JuicyPotato
-    + PotatoAPI class
-    + startCOMListener
-    + startRPCConnection
-    + triggerDCOM & IStorageTrigger
-    + LocalNegotiator::handleType1
-    + LocalNegotiator::handleType2
-    + LocalNegotiator::handleType3
-+ Detailed question
-+ WebShell version
-+ Ref
-
 ## Feature or vulnerability
 
 该提权手法的前提是拥有`SeImpersonatePrivilege`或`SeAssignPrimaryTokenPrivilege`权限，以下用户拥有`SeImpersonatePrivilege`权限（而只有更高权限的账户比如SYSTEM才有`SeAssignPrimaryTokenPrivilege`权限）：

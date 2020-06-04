@@ -5,20 +5,6 @@ summary: 在Go中调用VirtualProtect/VirtualAlloc绕过DEP，通过syscall或po
 featured-img: go-shellcode-loader
 ---
 
-TL; DR
-
-+ 在C/Cpp中动态加载shellcode
-  + Cast char array ptr to function ptr
-  + Win32API VirtualProtect
-  + Win32API VirtualAlloc
-+ 在Go中动态加载shellcode
-  + Invoke VirtualProtect & VirtualAlloc in Go
-  + Execute shellcode by syscall.Syscall
-  + Cast byte array ptr to function ptr in Go
-    + Go runtime中的函数元信息结构
-    + Go中的first-class函数对象是一个双重指针
-+ ShellCode Loader
-
 加载器repo：https://github.com/EddieIvan01/gld
 
 本文相关的代码可以在https://github.com/EddieIvan01/gld/tree/master/sample找到

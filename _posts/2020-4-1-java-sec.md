@@ -5,21 +5,6 @@ featured-img: java
 summary: 系统学习，作个人备忘
 ---
 
-+ [Java基础](#java基础)
-  + [ClassLoader](#classloader)
-  + [Java反射](#java反射)
-  + [Unsafe包](#unsafe)
-  + [命令执行](#命令执行)
-  + [UrlConnectoin](#urlconnection)
-  + [Java序列化](#java序列化)
-+ [Java安全](#java安全)
-  + [RMI](#rmi)
-  + [LDAP](#ldap)
-  + [JNDI](#jndi)
-  + [安全限制](#安全限制)
-  + [Gadgets](#gadgets)
-  + [Vuln](#vuln)
-
 大概两年前写过简单的Java，一年前做过几次Java代码审计，因为偏见（语法啰嗦冗杂）一直没有系统的学习，用到时去找现成EXP就完了。大概19年CTF中Java安全的题目突然多了起来（正常情况下本来就该这样，实战中国内站本来就Java和.net居多，PHP相对少点，Python/node就别提了），各大安全社区也冒出很多Java安全文章（实际上最近学习中看到不少文章都是15年甚至更早）
 
 对有其它语言经验的人，学习过程中，重点放在Java特有的攻击方式即可。系统学习一遍，感觉Java也不是不可接受，只能说语言风格是沉稳工程型的
