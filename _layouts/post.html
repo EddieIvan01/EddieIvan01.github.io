@@ -48,8 +48,9 @@ layout: compress
   <main class="site__content">
     <div class="container">
       <article class="post-content" itemprop="articleBody">
-        <h5>目录<a href="javascript:$('#toc-container').toggle();">[CTL]</a></h5>
+        <h5>目录<a href="javascript:toggle()">[CTL]</a></h5>
         <ul id="toc-container" data-toc="div.container" data-toc-headings="h2,h3,h4"></ul>
+        <script>function toggle() {$('#toc-container').toggle()}</script>
         <hr>
         {{ content }}
 
