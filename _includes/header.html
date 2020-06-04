@@ -19,4 +19,18 @@
       </div>
     </div>
   </div>
+  <div class="toc"></div>
+  
+  <script src="{{ '/assets/js/jquery.js' | relative_url }}"></script>
+  <script src="{{ '/assets/js/jquery-catalog.js' | relative_url }}"></script>
+  <link href="{{ '/assets/css/jquery-catalog.css' | relative_url }}" rel="stylesheet"></link>
+  <script>
+    $(function(){
+        var options = {
+            root : window
+        };
+
+        $(".toc").generateCatalog(options);
+    });
+  </script>
 </header>
