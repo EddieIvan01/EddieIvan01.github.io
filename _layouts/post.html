@@ -45,23 +45,11 @@ layout: compress
     </div>
   </div>
 
-  <main class="site__content">
-    <div class="container">
-    <div class="toc"></div>
-    <script>
-    $(function(){
-        var options = {
-            root : window
-        };
-
-        $(".toc").generateCatalog(options);
-    });
-    </script>
-    </div>
-    
+  <main class="site__content">    
     <div class="container">
       <article class="post-content" itemprop="articleBody">
-
+        <ol data-toc="div.container" data-toc-headings="h2,h3,h4"></ol>
+        <br />
         {{ content }}
 
       </article>
