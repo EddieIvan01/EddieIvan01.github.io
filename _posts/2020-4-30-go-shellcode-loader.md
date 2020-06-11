@@ -145,6 +145,35 @@ memcpy(addr, buf)
 syscall.Syscall(addr, 0, 0, 0, 0)
 ```
 
+### (题外话：uintptr没有指针语义
+
+上面调用VirtualAlloc的方式其实是不严谨的，因为VirtualAlloc返回了uintptr，而uintptr没有指针语义，即该内存块引用计数为0，随时可能被GC掉（但其实对于这种加载Shellcode的场景问题不大）
+
+那么只需要使用一个Go的类型来承接，第一个想到的是byte数组，但由于编译期不知道shellcode长度，所以需要预先分配一块大内存，这样写感觉不太清真
+
+```go
+ptr := (*[990000]byte)(unsafe.Pointer(addr))
+for i, _ := range buf {
+    ptr[i] = buf[i]
+}
+```
+
+那么自然想到通过动态分配的Slice来做，将SliceHeader指向底层数组的指针修改为分配的内存块指针，寄希望于GC处理Slice时会考虑它引用的底层数组
+
+```go
+shellcode := make([]byte, len(buf), len(buf))
+(*(*reflect.SliceHeader)(unsafe.Pointer(&buf))).Data = address
+for i, _ := range buf {
+    shellcode[i] = buf[i]
+}
+```
+
+很遗憾，`reflect.SliceHeader`的注释说的很明白
+
+> Moreover, the Data field is not sufficient to guarantee the data it references will not be garbage collected, so programs must keep a separate, correctly typed pointer to the underlying data.
+
+所以如果为了绝对的内存安全，貌似只有上面那种不清真的做法可行
+
 ### Execute shellcode by syscall.Syscall
 
 看到上面两个例子都是通过`syscall.Syscall`执行shellcode
