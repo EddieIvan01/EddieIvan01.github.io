@@ -18,8 +18,8 @@ summary: 对Potato家族(Potato/RottenPotato/JuicyPotato/PrintSpoofer/RoguePotat
 
 **P.s. 本机测试时即使在本地策略中授予管理员组普通用户`SeImpersonatePrivilege`特权，在cmd.exe中`whoami /priv`也不显示该特权，且无法利用；而`SeAssignPrimaryTokenPrivilege `特权则可以正常授予普通用户**
 
-Windows服务的登录账户
-
+> Windows服务的登录账户
+>
 > 1. Local System(**NT AUTHORITY\System**)
 >    - It has the highest level of permissions on the local system.
 >    - If the client and the server are both in a domain, then the **Local System** account uses the PC account (**hostname$**) to login on the remote computer.
@@ -385,7 +385,7 @@ RpcExcept(EXCEPTION_EXECUTE_HANDLER);
 RpcEndExcept;
 ```
 
-接着等待5s，然后调用`GetSystem`
+接着等待5s，调用`GetSystem`
 
 #### ImpersonateNamedPipeClient
 
@@ -601,6 +601,8 @@ switch (messageType) {
 }
 ```
 
+**P.s. 这样写严格来讲有问题，`recv`返回的大小不确定，有可能正好截断了NTLMSSP数据。确保绝对正确应该写个buffer处理，但因为是loopback，且NTLMSSP一般只有不到512字节，所以一般来说问题不大**
+
 接下来是中继过程，需要将COM service发来的数据中继到RPC端口
 
 连接RPC的socket在`startRPCConnection`操作，两个线程间用了两个send queue通讯，所以这里将对RPC socket的`send/recv`转化为`push(rpcSendQ)/pop(comSendQ)`
@@ -760,7 +762,7 @@ AcceptSecurityContext(
 
 #### LocalNegotiator::handleType2
 
-处理RPC发来的NTLM type2，将RPC响应中的NTLM type2修改为`AcceptSecurityContext`本地协商返回的type2，也就是修改server challenge和reserved
+处理RPC发来的NTLM type2，将RPC响应中的NTLM type2修改为`AcceptSecurityContext`本地协商返回的type2
 
 ```c++
 char* newNtlmBytes = (char*)secServerBuffer.pvBuffer;
@@ -801,7 +803,7 @@ AcceptSecurityContext(
 
 #### ImpersonateToken
 
-后面没啥好说的了，调用`QuerySecurityContextToken`从security context中获取token
+接着调用`QuerySecurityContextToken`从security context中获取token
 
 ```c++
 QuerySecurityContextToken(test->negotiator->phContext, &elevated_token);
