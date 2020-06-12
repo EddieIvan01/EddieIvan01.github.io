@@ -397,7 +397,7 @@ RpcEndExcept;
 ImpersonateNamedPipeClient(hPipe);
 ```
 
-注意切换的是线程的上下文，所以这里调用`CreateProcess`还是用原进程的上下文
+注意切换的是线程的上下文，所以这里调用`CreateProcess`还是用原进程的上下文（进程的primary token）
 
 > CreateProcessA function
 >
@@ -411,11 +411,17 @@ ImpersonateNamedPipeClient(hPipe);
 OpenThreadToken(GetCurrentThread(), TOKEN_ALL_ACCESS, FALSE, &hSystemToken);
 ```
 
+P.s. primary token与进程关联，impersonation token与线程关联
+
 #### DuplicateTokenEx
 
-复制一个新的，使用了`DuplicateTokenEx`创建primary令牌，如果是`DuplicateToken`的话只能创建impersonation令牌，后面就不能调用`CreateProcessAsUser`了
+拿到当前线程的impersonation令牌后复制一个新的，使用`DuplicateTokenEx`创建primary令牌，如果是`DuplicateToken`的话只能创建impersonation令牌，而创建新进程需要传递primary令牌
 
-为什么要复制令牌，一方面是需要primary令牌，另一方面`CreateProcessXXX`的第一个入参必须有以下权限`TOKEN_QUERY, TOKEN_DUPLICATE, TOKEN_ASSIGN_PRIMARY`，通过`DuplicateToken`直接赋予复制的令牌`ALL_ACCESS`
+除了需要primary令牌启动新进程，另一方面`CreateProcessXXX`的第一个入参必须有以下权限`TOKEN_QUERY, TOKEN_DUPLICATE, TOKEN_ASSIGN_PRIMARY`，通过`DuplicateToken`直接赋予复制的令牌`ALL_ACCESS`
+
+> A handle to the primary token that represents a user. The handle must  have the TOKEN_QUERY, TOKEN_DUPLICATE, and TOKEN_ASSIGN_PRIMARY access  rights. 
+>
+> To get a primary token that represents the specified user, call the [LogonUser](https://docs.microsoft.com/windows/desktop/api/winbase/nf-winbase-logonusera) function. Alternatively, you can call the [DuplicateTokenEx](https://docs.microsoft.com/windows/desktop/api/securitybaseapi/nf-securitybaseapi-duplicatetokenex) function to convert an impersonation token into a primary token.
 
 ```c++
 DuplicateTokenEx(hSystemToken, TOKEN_ALL_ACCESS, NULL, SecurityImpersonation, TokenPrimary, &hSystemTokenDup);
