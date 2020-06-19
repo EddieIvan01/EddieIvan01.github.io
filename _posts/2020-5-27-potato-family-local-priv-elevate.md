@@ -126,6 +126,20 @@ CreateProcessAsUserW(
 
 为什么会有一系列`Impersonate`函数，微软本意是让高权限服务端可以模拟低权限客户端来执行操作以提高安全性，但被攻击者反向使用了
 
+***
+
+可以用来模拟Client的Windows API：
+
+> The Microsoft Windows API provides the following functions to begin an impersonation:
+>
+> - A DDE server application can call the [**DdeImpersonateClient**](https://msdn.microsoft.com/library/ms648756(v=VS.85).aspx) function to impersonate a client.
+> - A named-pipe server can call the [**ImpersonateNamedPipeClient**](https://msdn.microsoft.com/library/Aa378618(v=VS.85).aspx) function.
+> - You can call the [**ImpersonateLoggedOnUser**](https://msdn.microsoft.com/library/Aa378612(v=VS.85).aspx) function to impersonate the security context of a logged-on user's [*access token*](https://docs.microsoft.com/en-us/windows/desktop/SecGloss/a-gly).
+> - The [**ImpersonateSelf**](https://msdn.microsoft.com/library/Aa378729(v=VS.85).aspx) function enables a thread to generate a copy of its own access token.  This is useful when an application needs to change the security context  of a single thread. For example, sometimes only one thread of a process  needs to enable a [*privilege*](https://docs.microsoft.com/en-us/windows/desktop/SecGloss/p-gly).
+> - You can call the [**SetThreadToken**](https://msdn.microsoft.com/library/Aa379590(v=VS.85).aspx) function to cause the target thread to run in the security context of a specified [*impersonation token*](https://docs.microsoft.com/en-us/windows/desktop/SecGloss/i-gly).
+> - A Microsoft Remote Procedure Call (RPC) server application can call the [**RpcImpersonateClient**](https://docs.microsoft.com/en-us/windows/desktop/api/rpcdce/nf-rpcdce-rpcimpersonateclient) function to impersonate a client.
+> - A [*security package*](https://docs.microsoft.com/en-us/windows/desktop/SecGloss/s-gly) or application server can call the [**ImpersonateSecurityContext**](https://docs.microsoft.com/en-us/windows/desktop/api/sspi/nf-sspi-impersonatesecuritycontext) function to impersonate a client.
+
 ## How to get a high-privilege token
 
 Potato家族使用了一系列的手段
@@ -194,7 +208,7 @@ DWORD RpcRemoteFindFirstPrinterChangeNotificationEx(
 
 这个POC启动新进程是使用`CreateProcessAsUser`而不是`CreateProcessWithToken`
 
-作者使用`AsUser`而不是`WithToken`的原因和我猜的一样，用`CreateProcessAsUserW`是为了能在当前console执行，做到interactive。我测试时就发现了传递给`CreateProcessWithToken`的`lpEnvironment`参数似乎被忽略了，永远会启动新console，作者在issue里说这是个bug
+作者使用`AsUser`而不是`WithToken`的原因和我猜的一样，用`CreateProcessAsUserW`是为了能在当前console执行，做到interactive。我测试时就发现了传递给`CreateProcessWithToken`的`CreationFlags`参数似乎被忽略了，永远会启动新console（原因见[文章末尾](#differences-between-createprocessasuser-and-createprocesswithtoken)）
 
 只有前面调用`ImpersonateNamedPipeClient`时需要`SeImpersonatePrivilege`特权，调用成功线程切换到SYSTEM安全上下文，此时调用`CreateProcessAsUserW`时caller和authticator是相同的，就不需要`SeAssignPrimaryTokenPrivilege`权限
 
@@ -427,11 +441,13 @@ P.s. primary token与进程关联，impersonation token与线程关联
 DuplicateTokenEx(hSystemToken, TOKEN_ALL_ACCESS, NULL, SecurityImpersonation, TokenPrimary, &hSystemTokenDup);
 ```
 
-如果通过CLI传递了sessionID的话，就在指定的session中开启新进程，高版本Windows中通过`qwinsta`查看
+如果通过CLI传递了sessionID的话，就在指定的session中开启新进程（否则sessionID是0），通过`qwinsta`查看
+
+**这种做法只针对CreateProcessAsUser，而CreateProcessWithToken无论sessionID多少都会起在当前连接到物理控制台的session的桌面（原因见[文章末尾](#differences-between-createprocessasuser-and-createprocesswithtoken)）**
 
 ```c++
 if (g_dwSessionId)
-    SetTokenInformation(hSystemTokenDup, TokenSessionId, &g_dwSessionId, sizeof(DWORD));
+    SetTokenInformation(hSystemTokenDup, TokenSessionId, &g_dwSessionId, sizeof(DWORD))
 ```
 
 下面这一段做了一些创建新进程的细节配置，删掉也能执行
@@ -838,7 +854,6 @@ repo: https://github.com/EddieIvan01/win32api-practice
 ```c++
 BOOL CreateProcessWithOutput(HANDLE hToken) {
 	BOOL result;
-	DWORD SessionId;
 	PROCESS_INFORMATION pi;
 	STARTUPINFO si;
 	SECURITY_ATTRIBUTES sa = { 0 };
@@ -849,9 +864,6 @@ BOOL CreateProcessWithOutput(HANDLE hToken) {
 
 	ZeroMemory(&si, sizeof(STARTUPINFO));
 	ZeroMemory(&pi, sizeof(PROCESS_INFORMATION));
-	memset(&pi, 0x00, sizeof(PROCESS_INFORMATION));
-
-	DWORD sessionId = WTSGetActiveConsoleSessionId();
 
 	HANDLE hReadPipe = NULL;
 	HANDLE hWritePipe = NULL;
@@ -867,7 +879,6 @@ BOOL CreateProcessWithOutput(HANDLE hToken) {
 	si.hStdOutput = hWritePipe;
 	si.wShowWindow = SW_HIDE;
 	si.dwFlags = STARTF_USESHOWWINDOW | STARTF_USESTDHANDLES;
-	si.cb = sizeof(STARTUPINFO);
 	si.lpDesktop = (LPWSTR)L"winsta0\\default";
 
 	fflush(stdout);
@@ -924,9 +935,13 @@ Windows的HANDLE本质是个有引用计数的智能指针。且管道的`read/w
 
 另一个需要注意的点是，`ReadFile`获取的是`char*`而不是`wchar_t*`
 
-踩的一个坑是，`CreateProcessAsUser`创建的子进程没有办法通过匿名管道拿到输出，命令执行完成后读取pipe还是会阻塞（无数据写入）
+## Differences between CreateProcessAsUser and CreateProcessWithToken
 
-可以看到有人有同样的问题 https://bbs.csdn.net/topics/392036125
++ `AsUser`可传递`bInheritHandles`参数，子进程继承父进程句柄。必须设置为TRUE才能通过匿名管道获取子进程输出；`WithToken`默认继承句柄
++ 调用`AsUser`时可设置Token的sessionId，在不同session的活动站桌面上启动新进程；`WithToken`内部会统一修改Token的sessionId为`WTSGetActiveConsoleSessionId`函数返回值（也就是当前连接到物理控制台的session，同一时间只有一个，https://stackoverflow.com/a/61256918/11159056）
++ `AsUser`可以通过不设置`CreationFlags`的`CREATE_NEW_CONSOLE`来不启动新console，`WithToken`无论`CreationFlags`的值都会启动新console
+
+**究其原因，我曾在SO上看到`WithToken`内部调用了`AsUser`，所以很大可能是封装的`WithToken`函数在调用`AsUser`前进行了一些参数设置，比如设置Token的sessionId，调用`AsUser`时传递的`bInheritHandles`参数为TRUE，设置`CreationFlags |= CREATE_NEW_CONSOLE`**
 
 ## Ref
 
