@@ -168,9 +168,53 @@ for i, _ := range buf {
 }
 ```
 
-很遗憾，`reflect.SliceHeader`的注释说的很明白
+但很遗憾，`reflect.SliceHeader`的注释说的很明白
 
 > Moreover, the Data field is not sufficient to guarantee the data it references will not be garbage collected, so programs must keep a separate, correctly typed pointer to the underlying data.
+
+实验一下：
+
+```go
+func T1() []int {
+    fmt.Println("T1")
+    x := [64]int{}
+    fmt.Println(x)
+
+    return x[:]
+}
+
+func T2() []int {
+    fmt.Println("T2")
+    x := [64]int{}
+    fmt.Println(x)
+
+    tmp := reflect.SliceHeader{
+        (uintptr)(unsafe.Pointer(&x[0])), 64, 64,
+    }
+    return *(*[]int)(unsafe.Pointer(&tmp))
+}
+
+func main() {
+    x := T1()
+    runtime.GC()
+    fmt.Println(x)
+
+    x = T2()
+    runtime.GC()
+    fmt.Println(x)
+}
+```
+
+OUTPUT：
+
+```
+T1
+[0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0]
+[0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0]
+T2
+[0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0]
+[0 2 824634301200 4234250 4938528 4894336 1 0 824634301824 4826714 4938528 4894336 824633737280 0 0 0 0 0 0 0 4894336 0 0 0 0 0 23 824634301824 4831950 824634042608 4900672 824634301384 386 118 1 386 196608 0 3940709804408846 48 8 0 14680288 17193013920 8192 13152216 60130459662 824634301544 0 32 33751040 33751040 5140577 53 0 8 4961728 13152216 824634301760 4242256 23 1024 1024 4958720]
+```
 
 所以如果为了绝对的内存安全，貌似只有上面那种不清真的做法可行
 
