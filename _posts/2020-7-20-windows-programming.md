@@ -2,6 +2,7 @@
 layout: post
 title: 《Windows核心编程》笔记
 featured-img: windows-programming
+summary: DONE
 ---
 
 ## TOC
