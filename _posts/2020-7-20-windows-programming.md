@@ -1251,11 +1251,13 @@ HANDLE hThread = CreateRemoteThread(
 
 ### Message hook
 
-上文中的SetWindowsHook(Ex)，可设置hModule为NULL
-
-> A handle to the DLL containing the hook procedure pointed to by the *lpfn* parameter. The *hMod* parameter must be set to **NULL** if the *dwThreadId* parameter specifies a thread created by the current process and if the  hook procedure is within the code associated with the current process.
+上文中的SetWindowsHook(Ex)
 
 键盘记录：https://github.com/EddieIvan01/win32api-practice/tree/master/keylogger
+
+hook `WH_KEYBOARD_LL`事件，hook该低层事件时不会注入到其它进程，callback都是由安装hook的线程处理
+
+> However, the WH_KEYBOARD_LL hook is not injected into another process. Instead, the context switches back to the process that installed the hook and it is called in its original context. Then the context switches back to the application that generated the event.
 
 ### Inline hook
 
