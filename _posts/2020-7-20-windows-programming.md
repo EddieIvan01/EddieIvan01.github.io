@@ -1143,6 +1143,12 @@ REG项`HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Session Manager\Known
 
 在做DLL劫持时，KnownDll无法从当前目录加载，只能从SYSTEM32目录
 
+### 可执行文件实例间的数据共享
+
+加载DLL时，将同一片物理内存映射到不同进程的虚拟内存，但当进程尝试修改DLL中数据时，系统会拦截此类操作并做copy-on-write
+
+所以后文中hook远程进程时需要先DLL到远程进程地址空间再修改API入口点机器码
+
 ## 线程本地存储
 
 ### 动态TLS
