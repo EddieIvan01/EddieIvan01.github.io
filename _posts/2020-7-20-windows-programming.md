@@ -21,7 +21,7 @@ featured-img: windows-programming
 | PVOID      | 失败返回NULL，否则是数据块内存地址                |
 | LONG/DWORD | 看文档                                            |
 
-`GetLastError`函数获取Thread Local中的上一个错误代码
+`GetLastError`函数获取TLS中的上一个错误代码
 
 `VOID SetLastError(DWORD dwErrCode);`
 
@@ -283,7 +283,7 @@ while (Process32Next(hSnapshot, &pe32)) {
 
 #### 提权/降权启动进程
 
-使用管理员用户登录除了会授予一个security token，还会创建一个仅标准用户权限的filtered token。后续该用户所有启动的新进程都会和filtered token关联
+使用管理员用户登录除了会授予一个security token，还会创建一个仅标准用户权限的filtered token（UAC）。后续该用户所有启动的新进程都会和filtered token关联
 
 #### 自动提升进程权限
 
@@ -1141,6 +1141,8 @@ REG项`HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Session Manager\Known
 
 如果调用`LoadLibrary`时传递包含`.dll`扩展名的名称，会删除`.dll`扩展名然后在注册表查询KnownDLL，如未找到再通过通常的搜索规则
 
+在做DLL劫持时，KnownDll无法从当前目录加载，只能从SYSTEM32目录
+
 ## 线程本地存储
 
 ### 动态TLS
@@ -1174,7 +1176,7 @@ __declspec(thread) DWORD gt_dwTimeStamp = 0;
 
 静态TLS对性能和体积有影响
 
-## DLL注入和API拦截
+## DLL注入
 
 ### 通过注册表注入DLL
 
@@ -1188,7 +1190,7 @@ HKEY_LOCAL_MACHINE\Software\Microsoft\Windows NT\CurrentVersion\Windows\AppInit_
 
 只影响使用User32.dll的进程（GUI），大多数CUI不使用它
 
-### Windows Hook注入DLL
+### Windows Message Hook
 
 ```c++
 HHOOK hHook = SetWindowsHookEx(
@@ -1239,14 +1241,39 @@ HANDLE hThread = CreateRemoteThread(
 
 2. 线程参数的指针需要在远程线程地址空间内，通过`VirtualAllocEx`和`WriteProcessMemory`解决
 
-### Others
+## API Hook
 
-剩下几种感觉没什么用
+### Message hook
 
-### API拦截
+上文中的SetWindowsHook(Ex)，可设置hModule为NULL
 
-+ 修改函数开头几个机器码，JMP到自定义函数
-+ 修改模块导入段
+> A handle to the DLL containing the hook procedure pointed to by the *lpfn* parameter. The *hMod* parameter must be set to **NULL** if the *dwThreadId* parameter specifies a thread created by the current process and if the  hook procedure is within the code associated with the current process.
+
+键盘记录：https://github.com/EddieIvan01/win32api-practice/tree/master/keylogger
+
+### Inline hook
+
+原理是通过修改API入口地址的机器码，修改为JMP ADDR完成Hook。当然，需要考虑到DEP，堆栈平衡等细节
+
+Hook远程进程时最简单的方法是DLL注入，直接写ShellCode也是可以的
+
+### IAT hook
+
+和Inline hook类似，修改进程的IAT中的thunk，JMP到自定义地址
+
+### Hotfix hook
+
+某些API开头为`MOV EDI, EDI`和五个NOP，通过修改这7-byte的无效指令做JMP
+
+### SSDT hook
+
+SSDT（System Service Descriptor Table），属于内核层hook，这个我没有试验
+
+### Hook library
+
+https://github.com/TsudaKageyu/minhook
+
+https://github.com/Microsoft/Detours
 
 ## 异常处理
 
