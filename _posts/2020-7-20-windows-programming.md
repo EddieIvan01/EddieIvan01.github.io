@@ -1209,11 +1209,17 @@ HHOOK hHook = SetWindowsHookEx(
 
 idHook为hook的event类型：`WH_*`（e.g. `WH_GETMESSAGE`）
 
-lpfn为callback函数（当前地址空间内）
+lpfn为callback函数
+
+> A pointer to the hook procedure. If the dwThreadId parameter is zero or specifies the identifier of a thread created by a different process, the lpfn parameter must point to a hook procedure in a DLL. Otherwise, lpfn can point to a hook procedure in the code associated with the current process.
 
 hmod为lpfn所在的DLL
 
-dwThreadId如果为0，代表hook系统中所有GUI线程
+> A handle to the DLL containing the hook procedure pointed to by the lpfn parameter. The hMod parameter must be set to NULL if the dwThreadId parameter specifies a thread created by the current process and if the hook procedure is within the code associated with the current process.
+
+dwThreadId如果为0，代表hook系统中所有GUI线程。当hook的scope为global only时，则必须设置为0
+
+某些global hook的callback是由安装hook的线程调用的，此时dwThreadId为0，但hmod也可为NULL或`GetModuleHandle(NULL)`（当前PE文件）
 
 ***
 
@@ -1255,8 +1261,10 @@ HANDLE hThread = CreateRemoteThread(
 
 键盘记录：https://github.com/EddieIvan01/win32api-practice/tree/master/keylogger
 
-hook `WH_KEYBOARD_LL`事件，hook该低层事件时不会注入到其它进程，callback都是由安装hook的线程处理
+注册 `WH_KEYBOARD_LL` hook，hook该低层次事件时不会注入到其它进程，callback都是由安装hook的线程处理
 
+> This hook is called in the context of the thread that installed it. The call is made by sending a message to the thread that installed the hook. Therefore, the thread that installed the hook must have a message loop.
+> 
 > However, the WH_KEYBOARD_LL hook is not injected into another process. Instead, the context switches back to the process that installed the hook and it is called in its original context. Then the context switches back to the application that generated the event.
 
 ### Inline hook
