@@ -248,6 +248,10 @@ Command line：`GetCommandLine`/`CommandLineToArgv`
 4. Windows目录
 5. PATH环境变量
 
+ANSI版本的CreateProcessA可以直接传递pszCommandline参数为字面量，而UNICODE版本则必须是可写内存
+
+> The Unicode version of this function, CreateProcessW, can modify the contents of this string. Therefore, this parameter cannot be a pointer to read-only memory (such as a const variable or a literal string). If this parameter is a constant string, the function may cause an access violation.
+
 ***
 
 ### 终止进程
