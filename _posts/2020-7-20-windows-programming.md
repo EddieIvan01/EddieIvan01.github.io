@@ -252,6 +252,10 @@ ANSI版本的CreateProcessA可以直接传递pszCommandline参数为字面量，
 
 > The Unicode version of this function, CreateProcessW, can modify the contents of this string. Therefore, this parameter cannot be a pointer to read-only memory (such as a const variable or a literal string). If this parameter is a constant string, the function may cause an access violation.
 
+因为该函数需要临时修改pszCommandLine来解析，且在上世纪为了节约内存所以未拷贝新内存处理。而ANSI版本内部调用UNICODE版本，所以必须创建临时变量来转换参数
+
+见：https://devblogs.microsoft.com/oldnewthing/20090601-00/?p=18083
+
 ***
 
 ### 终止进程
