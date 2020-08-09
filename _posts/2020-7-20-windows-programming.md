@@ -281,10 +281,8 @@ PROCESSENTRY32 pe32 = PROCESSENTRY32{ sizeof pe32 };
 if (!Process32First(hSnapshot, &pe32))
     goto CLEANUP;
 
-while (Process32Next(hSnapshot, &pe32)) {
+while (Process32Next(hSnapshot, &pe32))
     wprintf(L"%s\n", pe32.szExeFile);
-    Process32Next(hSnapshot, &pe32);
-}
 ```
 
 ### 进程权限
