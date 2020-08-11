@@ -164,6 +164,8 @@ errno_t _tcscpy_s(PTSTR dst, size_t len, PCTSTR src);
 
 `CloseHandle`关闭内核对象
 
+有的创建内核对象失败时返回NULL，比如`CreateProcess / CreateThread`，有的返回`INVALID_HANDLE_VALUE`，比如`CreateFile`。历史原因：https://devblogs.microsoft.com/oldnewthing/20040302-00/?p=40443
+
 ### 跨进程共享内核对象: 
 
 #### 父子进程句柄继承
