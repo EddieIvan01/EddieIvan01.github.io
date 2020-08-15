@@ -1,7 +1,7 @@
 ---
 layout: post
 title: Go动态加载shellcode
-summary: 在Go中调用VirtualProtect/VirtualAlloc绕过DEP，通过syscall或pointer cast执行，实现分离免杀
+summary: 在Go中修改页保护属性绕过DEP，通过syscall或pointer cast执行，实现分离免杀
 featured-img: go-shellcode-loader
 ---
 
@@ -38,7 +38,7 @@ int main() {
 
 ### Win32API VirtualProtect
 
-高版本中默认开启DEP(Data Execution Prevention)，数据段默认仅有RW权限，代码段默认是READONLY权限
+高版本中默认开启DEP(Data Execution Prevention)，数据段默认仅有RW权限，代码段为READONLY权限
 
 ```c
 // constants
@@ -60,7 +60,7 @@ BOOL VirtualProtect{
 }
 ```
 
-调用win32API的VirtualProtect修改数据段为RWX权限，或增加预编译指令修改数据段权限
+调用Win32API的VirtualProtect修改数据段为RWX权限，或增加预编译指令修改数据段权限
 
 ```c
 void(*fn)(void);
@@ -97,6 +97,12 @@ LPVOID lpAlloc = VirtualAlloc(0, sizeof buf, MEM_COMMIT, PAGE_EXECUTE_READWRITE)
 memcpy(lpAlloc, buf, sizeof buf);
 ((void(*)())lpAlloc)();
 ```
+
+### Nt(Zw)ProtectVirtualMemory/Nt(Zw)AllocateVirtualMemory
+
+ntdll的非导出函数，是kernel32的那两个函数在R3的最底层，多了个process handle参数，
+
+R3下的`Nt*`和`Zw*`没区别，之所以写`Nt(Zw)`，因为说不定AV的黑名单不全 :)
 
 ## 在Go中动态加载shellcode
 
@@ -442,6 +448,8 @@ virtualProtect.Call(
 但问题出在，上述cast pointer的做法在x64下有概率出现内存错误（我仅会在x64下加载stageless shellcode时遇到），原因我猜是因为uintptr没有指针语义，例如`fmt.Fprint`内部buffer有可能破坏它的内存（以前遇到过一个fmt的buffer memory leak）
 
 所以一般情况下使用x86 shellcode + pointer cast是没有问题的，在x64下为了稳还是使用syscall加载比较好
+
+加载器还内置了检测沙盒功能，具体细节见README
 
 ***
 
