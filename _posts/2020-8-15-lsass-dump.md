@@ -1,7 +1,7 @@
 ---
 layout: post
 title: Dump LSASS的底层原理与对抗
-summary:  
+summary: 
 featured-img: lsass
 ---
 
@@ -12,32 +12,22 @@ featured-img: lsass
 From MSDN:
 
 + Security Accounts Manager database(SAM)
-
   + ( No password is ever stored in a SAM database—only the password hashes. )
-
 + LSASS process memory
-
   + Reversibly encrypted plaintext
   + Kerberos tickets (TGTs, service tickets)
   + NT hash
   + LM hash
-
 + LSA secrets on the hard disk driver
-
   + Account password for the computer’s AD DS account
   + Account passwords for Windows services that are configured on the computer
   + Account passwords for configured scheduled tasks
   + Account passwords for IIS application pools and websites
-
 + AD DS database(NTDS.dit)
-
   + ( Writable DC has a full copy of AD DS database, RODCs has a subset of the accounts, do not have a copy of privileged domain accounts )
-
   + NT hash for the current password
   + NT hashes for password history (if configured)
-
 + Credential Manager store
-
   + ( Stored on the hard disk drive, protected by DPAPI )
 
 ***
