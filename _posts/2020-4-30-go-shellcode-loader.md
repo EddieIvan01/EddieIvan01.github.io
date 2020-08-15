@@ -60,7 +60,9 @@ BOOL VirtualProtect{
 }
 ```
 
-调用Win32API的VirtualProtect修改数据段为RWX权限，或增加预编译指令修改数据段权限
+调用Win32API的VirtualProtect修改数据段为PAGE_EXECUTE_READ权限，或增加预编译指令修改数据段权限
+
+**修改成RX权限就足够了，RWX内存块太明显容易被杀，实际上，仅仅PAGE_EXECUTE权限也是可以正常执行的**
 
 ```c
 void(*fn)(void);
