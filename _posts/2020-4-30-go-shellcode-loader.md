@@ -102,11 +102,34 @@ memcpy(lpAlloc, buf, sizeof buf);
 
 ### Nt(Zw)ProtectVirtualMemory/Nt(Zw)AllocateVirtualMemory
 
-ntdll的非导出函数，是kernel32的那两个函数在R3的最底层，多了个process handle参数，
+ntdll的非导出函数，是上文两个函数在R3的最底层，多了个process handle参数，
 
 R3下的`Nt*`和`Zw*`没区别，之所以写`Nt(Zw)`，因为说不定AV的黑名单不全 :)
 
 ## 在Go中动态加载shellcode
+
+需要说明的是，**在Go中，VirtualAlloc和VirtualProtect都有可能出现未预期错误**
+
+比如VA，因为分配的内存仅由uintptr指向（无指针语义），在GC眼里无变量使用，可回收
+
+对于VP，byte切片的底层数组分配在堆上，MSDN提到
+
+> It is best to avoid using VirtualProtect to change page protections on memory blocks allocated by GlobalAlloc, HeapAlloc, or LocalAlloc, because multiple memory blocks can exist on a single page. The heap manager assumes that all pages in the heap grant at least read and write access.
+
+修改页保护属性为无R/W权限后，当分配的堆上新内存正好在当前页时会崩
+
+go1.14，`fmt.Println(virtuaProtect(...))`可以稳定复现，跟踪到`src/runtime/malloc.go#1015`：
+
+```go
+span := c.alloc[tinySpanClass]
+v := nextFreeFast(span)
+if v == 0 {
+    v, _, shouldhelpgc = c.nextFree(tinySpanClass)
+}
+x = unsafe.Pointer(v)
+(*[2]uint64)(x)[0] = 0
+(*[2]uint64)(x)[1] = 0
+```
 
 ### Invoke VirtualProtect & VirtualAlloc in Go
 
