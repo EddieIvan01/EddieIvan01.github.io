@@ -36,7 +36,7 @@ From MSDN:
 
 ## Dump LSASS
 
-### dbgcore.dll!MiniDumpWriteDump
+### dbgcore!MiniDumpWriteDump
 
 该API可Dump进程内存，生成转储文件
 
@@ -50,9 +50,9 @@ BOOL MiniDumpWriteDump(
 );
 ```
 
-`dbghelp.dll!MiniDumpWriteDump`指向`dbgcore.dll!MiniDumpWriteDump`
+`dbghelp!MiniDumpWriteDump`指向`dbgcore!MiniDumpWriteDump`
 
-### comsvcs.dll!MiniDump
+### comsvcs!MiniDump
 
 该函数为`MiniDumpWriteDump`的封装
 
@@ -76,7 +76,7 @@ rundll32 comsvcs.dll MiniDump [PID] 1.bin full
 .\argument-spoofer.exe "rundll32 comsvcs.dll MiniDump [PID] 1.bin full"
 ```
 
-### ntdll.dll!NtReadVirtualMemory
+### ntdll!NtReadVirtualMemory
 
 说到底`MiniDumpWriteDump`也只是读取进程虚拟内存并解析结构化数据，到R3最底层还是通过`NtReadVirtualMemory`系统调用，所以完全可以读取后自行解析，这样就可以消除`MiniDump`API的特征
 
@@ -106,7 +106,7 @@ reg add HKLM\SYSTEM\CurrentControlSet\Control\SecurityProviders\WDigest /v UseLo
 
 ### API Inline Hook
 
-针对内存Dump，部分EDR会inline-hook关键函数，例如`ntdll.dll!NtReadVirtualMemory`
+针对内存Dump，部分EDR会inline-hook关键函数，例如`ntdll!NtReadVirtualMemory`
 
 通过对比内存和磁盘上DLL中函数的字节码，检测并解除inline-hook
 
