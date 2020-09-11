@@ -1,7 +1,7 @@
 ---
 layout: post
-title: Go动态加载shellcode
-summary: 在Go中修改页保护属性绕过DEP，通过syscall或pointer cast执行，实现分离免杀
+title: Golang动态加载shellcode
+summary: Golang修改页保护属性绕过DEP，通过syscall或pointer cast执行，实现分离免杀
 featured-img: go-shellcode-loader
 ---
 
